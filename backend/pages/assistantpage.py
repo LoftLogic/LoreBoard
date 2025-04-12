@@ -5,7 +5,7 @@ from pydantic import BaseModel, create_model, Field
 
 import json
 
-from templates.entity_templates import generate_character_sheet
+from backend.pages.templates.entity_templates import generate_character_sheet
 
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import JsonOutputParser
