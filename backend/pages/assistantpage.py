@@ -10,6 +10,7 @@ from templates.entity_templates import generate_character_sheet
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import JsonOutputParser
 
+import json
 
 from langchain.prompts import PromptTemplate
 from langchain.prompts.chat import (
@@ -40,7 +41,22 @@ class Entity(ABC):
         """
         raise NotImplementedError("Must be overriden by subclass")
         
-        
+    @abstractmethod
+    def reset(self):
+        """
+        Resets the sheet to square one.
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def initial_pass(self):
+        """
+        Does an initial reading of text and creates a character sheet.
+        Should only be called once unless reset.
+        Raises a runtime error if its already called.
+        """
+        raise NotImplementedError
+    
     @abstractmethod
     def update(self):
         """
@@ -51,12 +67,11 @@ class Entity(ABC):
     
     @abstractmethod
     def as_dict(self) -> dict:
-        raise NotImplementedError()
+        raise NotImplementedError
     
     @abstractmethod
     def as_json(self) -> str:
         raise NotImplementedError("Must be overridden by subclass")
-
 
 class Character(Entity):
     """
@@ -64,11 +79,7 @@ class Character(Entity):
     """
     def __init__(self, name: str):
         self.name = name
-        self.aliases = {name}
-        self.physical_traits: str = "Physical Traits:\n To be created. (Call an update to create)"
-        self.personality_traits: str = "Personality Traits:\n To be created. (Call an update to create)"
-        self.actions: str = "Actions:\n To be created. (Call an update to create)"
-        self.relationships: str = "Relationships: To be created. (Call an update to create)"
+        self.reset()
         
     def add_alias(self, new_alias):
         self.aliases.add(new_alias)
@@ -76,7 +87,22 @@ class Character(Entity):
     def removes_alias(self, to_remove):
         self.aliases.remove(to_remove)
 
+    def reset(self):
+        self.initialized_flag = False
+        self.aliases = {self.name}
+        self.physical_traits: str = "Physical Traits:\n To be created. (Call an update to create)"
+        self.personality_traits: str = "Personality Traits:\n To be created. (Call an update to create)"
+        self.actions: str = "Actions:\n To be created. (Call an update to create)"
+        self.relationships: str = "Relationships: To be created. (Call an update to create)"
+
+    def initial_pass(self):
+        if self.initialized_flag:
+            raise RuntimeError("Already initialized")
+        
+        raise NotImplementedError
+
     def update(self, passages):
+        self.initialized_flag = True
         template: ChatPromptTemplate = generate_character_sheet(passages, self.name, self.aliases)
         llm = ChatOpenAI(model='gpt-4o')
         parser = JsonOutputParser()
@@ -106,6 +132,9 @@ class Character(Entity):
     
     def as_json(self) -> str:
         return json.dumps(self.as_dict, indent=4)
+
+
+
     
 class Setting(Entity):
     """
@@ -114,10 +143,12 @@ class Setting(Entity):
     def __init__(self, name: str):
         self.name = name
         self.aliases = {name}
-        self.description = "Description: \n To be Created (Call an update to create)"
-        self.special_traits = "Special Traits: \n To be Created (Call an update to create)"
-        self.story_relevance = "Story Relevance: \n To be Created (Call an update to create)"
-        self.general_location = "General Location: \n To be Created (Call an update to create)"
+        self.basic_role = "To be Created (Call an update to create)"
+        self.physical_descriptions = "To be Created (Call an update to create)"
+        self.personality_descriptions = "To be Created (Call an update to create)"
+        self.stake_in_the_story = "To be Created (Call an update to create)"
+        self.change_development = "To be Created (Call an update to create)"
+        self.relationships = "To be Created (Call an update to create)"
         
     def add_alias(self, new_alias):
         self.aliases.add(new_alias)
@@ -153,7 +184,6 @@ class Macro:
         return self.entity == other.entity
     
 if __name__ == "__main__":
-    import json
     char = Character("Achilles")
     
     passage = """
@@ -208,7 +238,6 @@ His plate was just the way he liked- three pastries in a triangle, one with cust
 	“What are you going to do now?” She asked, clearly hoping for a specific answer.
 	How could I be so pathetic? His mind screamed internally. A fall in water was enough to make him surrender his will? He was a bladesman, a warrior, and possessed all the bravery and valor that came with. “I’m going to live. I’m going to win!” He proclaimed, with a strength he had not felt in a long time. Despite knowing that it was probably a lie, he was content knowing he would at least try, and in the worst case, die honorably, sword in hand.
 	“Good, good! I’m very proud of you. Now, Achilles” She looked at him, with a strong sense of admiration. “Wake Up!”
-
     """
     
     print(json.dumps(char.update(passage), indent=4))

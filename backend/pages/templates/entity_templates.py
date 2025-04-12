@@ -11,16 +11,16 @@ def generate_character_sheet(passages: list[str], character: str, aliases: set[s
     Generates a character sheet for a given character.
     """
     
-    aliases.copy()
+    aliases_copy = aliases.copy()
     
-    if character in aliases:
-        aliases.remove(character)
+    if character in aliases_copy:
+        aliases_copy.remove(character)
     
     recognition_str = ""
     
-    if aliases:
+    if aliases_copy:
         recognition_str = "This character also has the names/aliases "
-        for alias in aliases:
+        for alias in aliases_copy:
             recognition_str += alias + ", "
         recognition_str = recognition_str[:-2]
     
@@ -67,3 +67,7 @@ def generate_character_sheet(passages: list[str], character: str, aliases: set[s
     
     template = template.partial(character=character, recognition_str=recognition_str)
     return template
+
+def add_to_character_sheet(passages: list[str], character: str, aliases: set[str], last_sheet: dict):
+    pass
+
