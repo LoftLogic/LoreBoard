@@ -24,7 +24,6 @@ File for all pages for the assistant. Includes entities, metadata, etc.
 """
 
 class Entity(ABC):
-    
     @abstractmethod
     def add_alias(self, new_alias: str):
         """
@@ -132,6 +131,8 @@ class Character(Entity):
     
     def as_json(self) -> str:
         return json.dumps(self.as_dict, indent=4)
+
+
 
 
 
