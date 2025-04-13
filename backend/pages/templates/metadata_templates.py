@@ -21,7 +21,7 @@ def generate_chapter_metadata(passage: str, last_summaries: list[str]) -> ChatPr
     template_str = """
     # Prompt
     Objective: Your to act as a creative writing assistant focused on chapter analysis. 
-    {{previous_summaries}}
+    {previous_summaries}
     Your given a chapter to read and analyze, and record notes as you do so. These notes are kept as reference for the writer, as such they should be informative and not just taken verbatim from the passage text.
     
     You are to record the following as you read the chapter.

@@ -35,6 +35,7 @@ class ChapterMetaSheet:
         Updates the metadata of the chapter.
         Can be considered an expensive operation.
         """
+        
         self.initialized_flag = True
         template: ChatPromptTemplate = generate_character_sheet(chapter)
         
