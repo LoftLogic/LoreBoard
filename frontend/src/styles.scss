@@ -395,7 +395,7 @@ body {
   display: flex;
   height: 100vh; /* Full viewport height */
   overflow: hidden; /* Prevent scrolling at the app level */
-  background-color: #282c34; /* Dark background for the whole app */
+  background-color: #252525; /* Dark background for the whole app - Changed from #282c34 */
   color: #abb2bf; /* Light text color */
   box-sizing: border-box; /* Ensure padding/border included in height */
 }
@@ -507,7 +507,7 @@ body {
     }
 
     &.active {
-      background-color: rgba(#ffffff, 0.1);
+      background-color: rgba(#ffffff, 0.15);
       color: #ffffff;
       font-weight: 500;
     }
@@ -572,7 +572,7 @@ body {
   border-left: 1px solid #444; /* Separator line */
   display: flex;
   flex-direction: column;
-  background-color: #21252b; /* Slightly different background */
+  background-color: #252525; /* Slightly different background - Changed from #21252b */
   overflow: hidden; /* Prevent children from overflowing the panel */
   box-sizing: border-box; /* Include padding/border */
   transition: width 0.3s ease; /* Add transition like left sidebar */
@@ -1142,27 +1142,37 @@ body {
 
 /* Entity Popup Styles */
 .entity-popup-overlay {
-  position: fixed; /* Cover the whole screen */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Ensure it's above other content */
+  z-index: 1000;
 }
 
 .entity-popup-content {
-  background-color: #2e2e2e; /* Dark background for the popup */
-  padding: 20px;
+  background-color: #fff;
+  padding: 25px;
   border-radius: 8px;
-  min-width: 300px; /* Minimum width */
-  max-width: 500px; /* Maximum width */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  position: relative; /* Needed for absolute positioning of the close button */
-  color: #e0e0e0; /* Light text color */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
 }
 
 .close-popup-button {
@@ -1171,57 +1181,105 @@ body {
   right: 10px;
   background: none;
   border: none;
-  font-size: 1.5em;
+  font-size: 24px;
   color: #aaa;
   cursor: pointer;
+  line-height: 1;
+  padding: 5px;
+
+  &:hover {
+    color: #333;
+  }
 }
 
-.close-popup-button:hover {
-  color: #fff;
-}
-
-.entity-popup-content h2 {
-  margin-top: 0;
-  color: #fff; /* White heading */
-  border-bottom: 1px solid #444; /* Separator line */
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-
-.entity-popup-content p {
-  color: #ccc; /* Slightly lighter paragraph text */
-}
-
-/* Styles for entity fields inside the popup */
 .entity-fields-container {
-  margin-top: 15px; /* Space below the header */
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Space between fields */
+  gap: 15px;
 }
 
 .entity-field {
   display: flex;
-  flex-direction: column; /* Stack label above value */
-  gap: 3px; /* Space between label and value */
-  padding-bottom: 8px;
-  border-bottom: 1px solid #404040; /* Subtle separator */
-}
-
-.entity-field:last-child {
-  border-bottom: none; /* No border for the last item */
+  flex-direction: column;
+  line-height: 1.5;
 }
 
 .field-label {
-  font-weight: bold;
+  font-weight: 600;
   font-size: 0.9em;
-  color: #aaa; /* Slightly muted label color */
-  text-transform: uppercase;
+  color: #555;
+  margin-bottom: 4px;
 }
 
 .field-value {
   font-size: 1em;
-  color: #e0e0e0; /* Main text color */
-  white-space: pre-wrap; /* Respect newlines in the data */
-  word-break: break-word; /* Break long words */
+  color: #333;
+  white-space: pre-wrap;
+}
+
+/* --- End Entity Popup Styles --- */
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 15px 8px 10px;
+  margin: 2px 0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  position: relative;
+
+  &:hover {
+    background-color: rgba(#ffffff, 0.1); // Changed from #f0f0f0 for subtlety
+  }
+
+  &.active {
+    background-color: rgba(#ffffff, 0.15);
+    color: #ffffff;
+    font-weight: 500;
+  }
+
+  .sidebar-item-icon {
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-item-name {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-item-input {
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+
+  .sidebar-item-delete {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 5px;
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+
+    &:hover {
+      color: #f5222d;
+    }
+  }
+
+  &:hover .sidebar-item-delete {
+    opacity: 1;
+  }
+
+  &.editing .sidebar-item-delete {
+    display: none;
+  }
 }

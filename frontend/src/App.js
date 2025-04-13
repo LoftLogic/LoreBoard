@@ -69,7 +69,7 @@ const MenuBar = ({ editor }) => {
   );
 };
 
-const SelectionMenu = ({ editor }) => {
+const SelectionMenu = ({ editor, handleTrackEntity }) => {
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [commentText, setCommentText] = useState('');
 
@@ -91,52 +91,6 @@ const SelectionMenu = ({ editor }) => {
       setShowCommentInput(false);
     }
   };
-
-  const handleTrackEntity = useCallback(async (entityType) => {
-    if (!editor) return;
-
-    const { from, to } = editor.state.selection;
-    const selectedText = editor.state.doc.textBetween(from, to);
-
-    if (!selectedText.trim()) {
-      console.log("No text selected for tracking.");
-      return;
-    }
-
-    const apiEntityType = entityType.toLowerCase();
-    const apiUrl = `http://localhost:8000/api/entities/${apiEntityType}`;
-
-    const requestBody = {
-      name: selectedText,
-      selected_text: selectedText,
-      position: from
-    };
-
-    console.log(`Tracking Entity: Type=${entityType}, Text='${selectedText}', Position=${from}`);
-    console.log(`Sending POST request to ${apiUrl} with body:`, requestBody);
-
-    try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.detail || response.statusText}`);
-      }
-
-      const createdEntity = await response.json();
-      console.log('Successfully created entity:', createdEntity);
-
-    } catch (error) {
-      console.error('Error tracking entity:', error);
-    }
-
-  }, [editor]);
 
   return (
     <BubbleMenu className="bubble-menu" editor={editor} tippyOptions={{ duration: 100 }}>
@@ -253,6 +207,11 @@ export const App = () => {
   const [editorContent, setEditorContent] = useState(initialContent);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false); // State for chat collapse
 
+  // State for entities
+  const [characters, setCharacters] = useState([]);
+  const [places, setPlaces] = useState([]);
+  const [items, setItems] = useState([]);
+
   const editor = useEditor({
     extensions: extensions,
     content: editorContent,
@@ -279,6 +238,94 @@ export const App = () => {
     }
     setEditorContent(newContent); // Update local state too
   }, [activePageId, pages, editor]); // Add editor to dependencies
+
+  // Fetch existing entities on component mount
+  useEffect(() => {
+    const fetchEntities = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/entities'); // Adjust URL if needed
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Fetched entities:", data);
+        setCharacters(data.characters || []);
+        setPlaces(data.places || []);
+        setItems(data.items || []);
+      } catch (error) {
+        console.error("Error fetching entities:", error);
+        // Handle error appropriately, maybe show a message to the user
+      }
+    };
+
+    fetchEntities();
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // Log state whenever entities change (for debugging)
+  useEffect(() => {
+    console.log('[App.js useEffect] Entity state changed:', { characters, places, items });
+  }, [characters, places, items]);
+
+  // ---- ADD handleTrackEntity definition HERE ----
+  const handleTrackEntity = useCallback(async (entityType) => {
+    if (!editor) return;
+
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to);
+
+    if (!selectedText.trim()) {
+      console.log("No text selected for tracking.");
+      return;
+    }
+
+    const apiEntityType = entityType.toLowerCase();
+    const apiUrl = `http://localhost:8000/api/entities/${apiEntityType}`;
+
+    const requestBody = {
+      name: selectedText,
+      selected_text: selectedText, // Keep selected_text for backend compatibility
+      position: from
+    };
+
+    console.log(`Tracking Entity: Type=${entityType}, Text='${selectedText}', Position=${from}`);
+    console.log(`Sending POST request to ${apiUrl} with body:`, requestBody);
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.detail || response.statusText}`);
+      }
+
+      const createdEntity = await response.json();
+      console.log('Successfully created entity:', createdEntity);
+
+      // Update frontend state using the setters from App's scope
+      if (apiEntityType === 'character') {
+        setCharacters(prev => [...prev, createdEntity]);
+      } else if (apiEntityType === 'place') {
+        setPlaces(prev => [...prev, createdEntity]);
+      } else if (apiEntityType === 'item') {
+        setItems(prev => [...prev, createdEntity]);
+      }
+
+      // Log the state right after setting it (accessing App's state directly)
+      // We can rely on the useEffect above to log the final state after update.
+      // console.log('Entity state updated in handleTrackEntity:', { characters, places, items }); // Optional log
+
+    } catch (error) {
+      console.error('Error tracking entity:', error);
+      // TODO: Show user-friendly error message
+    }
+  // Add dependencies for useCallback: editor instance and state setters
+  }, [editor, setCharacters, setPlaces, setItems]);
 
   const handleSelectPage = useCallback((pageId) => { // Renamed handler
     setActivePageId(pageId);
@@ -330,7 +377,7 @@ export const App = () => {
 
   return (
     <div className="app-container">
-      <LeftSidebar 
+      <LeftSidebar
         pages={pages} // Pass pages instead of directoryData
         activePageId={activePageId} // Pass activePageId
         onSelectItem={handleSelectPage} // Pass renamed handler
@@ -338,12 +385,17 @@ export const App = () => {
         onAddNewPage={handleAddNewPage}
         onRenameItem={handleRenamePage}   // Pass renamed handler
         onDeleteItem={handleDeletePage}   // Pass renamed handler
+        // Pass entity lists
+        characters={characters}
+        places={places}
+        items={items}
       />
       <div className="main-content">
         <MenuBar editor={editor} />
         <div className="tiptap-container">
           <EditorContent editor={editor} />
-          {editor && <SelectionMenu editor={editor} />}
+          {/* Pass handleTrackEntity down to SelectionMenu */}
+          {editor && <SelectionMenu editor={editor} handleTrackEntity={handleTrackEntity} />}
           {editor && <CommentViewComponent editor={editor} />}
         </div>
       </div>

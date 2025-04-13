@@ -123,36 +123,132 @@ const PageItem = ({ item, activePageId, onSelectItem, onRenameItem, onDeleteItem
   );
 };
 
-const LeftSidebar = ({ pages, activePageId, onSelectItem, onAddNewPage, onRenameItem, onDeleteItem }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [showEntityPopup, setShowEntityPopup] = useState(false);
+const SidebarItem = ({ item, level = 0, activePageId, onSelectItem, onRenameItem, onDeleteItem, onEntityClick }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState(item.name);
+  const [itemType, setItemType] = useState(item.type || 'page'); // Assume 'page' if type is missing
   const [selectedEntity, setSelectedEntity] = useState(null); // Use this state
 
-  // Sample Entities with more details
-  const sampleCharacter = {
-    id: 'char1', name: 'Heroic Knight', type: 'character',
-    physical: "Tall, broad-shouldered, scar across left eye, wears shining plate armor.",
-    personality: "Brave, stoic, honorable, but secretly doubts his own courage.",
-    background: "Second son of a minor lord, trained from youth in combat.",
-    goals: "Protect the kingdom, uphold his family honor.",
-    relationships: "Loyal to the King, mentors a young squire."
+  const handleSelect = () => {
+    if (itemType === 'page') { // Only select pages for now
+      onSelectItem(item.id);
+    } else if (onEntityClick) { // If it's an entity and handler exists, call it
+      onEntityClick(item);
+    }
   };
-  const samplePlace = {
-    id: 'place1', name: 'Mystic Forest', type: 'place',
-    physical: "Ancient trees with glowing moss, twisting paths, hidden clearings.",
-    environment: "Perpetual twilight, air thick with magic, strange animal calls.",
-    purpose: "Source of potent herbs, home to elusive magical creatures.",
-    history: "Site of an old druidic civilization, rumored to be cursed.",
-    location: "Bordering the northern mountains, difficult to navigate."
+
+  const handleRename = () => {
+    if (isEditing && newName.trim() !== item.name) {
+      onRenameItem(item.id, newName.trim(), itemType);
+    }
+    setIsEditing(!isEditing);
   };
-  const sampleItem = {
-    id: 'item1', name: 'Enchanted Sword', type: 'item',
-    physical: "Gleaming silver blade, hilt wrapped in worn blue leather, emits a faint hum.",
-    function: "Cuts through magical barriers, glows when danger is near.",
-    origin: "Forged by ancient elves, lost for centuries.",
-    ownership: "Currently wielded by the Heroic Knight.",
-    properties: "Unbreakable, enhances wielder's speed."
+
+  const handleDelete = (e) => {
+    e.stopPropagation(); // Prevent selection when clicking delete
+    if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
+      onDeleteItem(item.id, itemType);
+    }
   };
+
+  const handleNameChange = (e) => {
+    setNewName(e.target.value);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleRename();
+    } else if (e.key === 'Escape') {
+      setNewName(item.name);
+      setIsEditing(false);
+    }
+  };
+
+  // Determine icon based on type
+  let icon = '📄'; // Default page icon
+  if (itemType === 'character') icon = '🧑';
+  else if (itemType === 'place') icon = '🏞️';
+  else if (itemType === 'item') icon = '🗡️';
+
+  const isActive = activePageId === item.id && itemType === 'page';
+
+  const handleEntityClick = (entity) => {
+    // We need the full entity details here, not just the summary.
+    // For now, we'll fetch them again when clicked.
+    // This is inefficient - ideally App.js fetches full details initially
+    // or provides a function to fetch details on demand.
+    // --- Temporary Fetch (Placeholder for better strategy) ---
+    const fetchFullEntityDetails = async (entityId, entityType) => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/entities/${entityType}/${entityId}`);
+        if (!response.ok) throw new Error('Failed to fetch details');
+        const fullData = await response.json();
+        console.log("Fetched full entity details:", fullData);
+        setSelectedEntity({ ...entity, ...fullData }); // Merge summary with full data
+        setShowEntityPopup(true);
+      } catch (error) {
+        console.error("Error fetching full entity details:", error);
+        // Fallback: Show popup with potentially limited info from props
+        setSelectedEntity(entity);
+        setShowEntityPopup(true);
+      }
+    };
+    // --- End Temporary Fetch ---
+    
+    fetchFullEntityDetails(entity.id, entity.type);
+    // Original simpler logic (if props contained full details):
+    // setSelectedEntity(entity);
+    // setShowEntityPopup(true);
+  };
+
+  return (
+    <div
+      className={`sidebar-item ${isActive ? 'active' : ''} ${isEditing ? 'editing' : ''}`}
+      style={{ paddingLeft: `${level * 15 + 10}px` }}
+      onClick={handleSelect}
+    >
+      <span className="sidebar-item-icon">{icon}</span>
+      {isEditing ? (
+        <input
+          type="text"
+          value={newName}
+          onChange={handleNameChange}
+          onBlur={handleRename} // Save on blur
+          onKeyDown={handleKeyDown}
+          autoFocus
+          className="sidebar-item-input"
+          onClick={(e) => e.stopPropagation()} // Prevent selection when clicking input
+        />
+      ) : (
+        <span className="sidebar-item-name" onDoubleClick={() => setIsEditing(true)}>
+          {item.name}
+        </span>
+      )}
+      {(itemType === 'page') && ( // Only show delete for pages for now
+          <button className="sidebar-item-delete" onClick={handleDelete} title="Delete">×</button>
+      )}
+      {/* Add rename/delete for entities later if needed */}
+    </div>
+  );
+};
+
+const LeftSidebar = ({
+  pages,
+  characters,
+  places,
+  items,
+  activePageId,
+  onSelectItem,
+  onAddNewPage,
+  onRenameItem,
+  onDeleteItem
+}) => {
+  // Log props on every render
+  console.log('LeftSidebar receiving props:', { characters, places, items });
+
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showEntityPopup, setShowEntityPopup] = useState(false);
+  const [selectedEntity, setSelectedEntity] = useState(null);
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -163,9 +259,24 @@ const LeftSidebar = ({ pages, activePageId, onSelectItem, onAddNewPage, onRename
   };
 
   const handleEntityClick = (entity) => {
-    setSelectedEntity(entity);
-    setShowEntityPopup(true);
-    // console.log("Clicked entity:", entity); // Keep for debugging if needed
+    const fetchFullEntityDetails = async (entityId, entityType) => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/entities/${entityType}/${entityId}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Failed to fetch details: ${errorData.detail || response.statusText}`);
+        }
+        const fullData = await response.json();
+        console.log("Fetched full entity details:", fullData);
+        setSelectedEntity({ ...entity, ...fullData });
+        setShowEntityPopup(true);
+      } catch (error) {
+        console.error("Error fetching full entity details:", error);
+        setSelectedEntity(entity);
+        setShowEntityPopup(true);
+      }
+    };
+    fetchFullEntityDetails(entity.id, entity.type);
   };
 
   const closeEntityPopup = () => {
@@ -173,7 +284,6 @@ const LeftSidebar = ({ pages, activePageId, onSelectItem, onAddNewPage, onRename
     setSelectedEntity(null);
   }
 
-  // Helper function to render fields
   const renderEntityFields = (entity) => {
     if (!entity) return null;
 
@@ -207,10 +317,12 @@ const LeftSidebar = ({ pages, activePageId, onSelectItem, onAddNewPage, onRename
     return (
       <div className="entity-fields-container">
         {Object.entries(fieldsToShow).map(([label, value]) => (
-          <div key={label} className="entity-field">
-            <span className="field-label">{label}:</span>
-            <span className="field-value">{value || '-'}</span> {/* Show '-' if value is empty */}
-          </div>
+          (value !== undefined && value !== null && value !== "") && (
+            <div key={label} className="entity-field">
+              <span className="field-label">{label}:</span>
+              <span className="field-value">{value || '-'}</span>
+            </div>
+          )
         ))}
       </div>
     );
@@ -233,49 +345,76 @@ const LeftSidebar = ({ pages, activePageId, onSelectItem, onAddNewPage, onRename
 
           <div className="sidebar-content">
             {/* Pages Section */}
-            <h4 className="sidebar-section-header">Pages</h4>
-            <ul className="directory-list">
+            <div className="sidebar-section">
+              <div className="sidebar-section-header">
+                <h3>Pages</h3>
+              </div>
               {pages.map(page => (
-                <PageItem
+                <SidebarItem
                   key={page.id}
-                  item={page}
+                  item={{...page, type: 'page'}} // Ensure type is page
+                  level={0}
                   activePageId={activePageId}
                   onSelectItem={onSelectItem}
-                  onRenameItem={onRenameItem}
-                  onDeleteItem={onDeleteItem}
+                  onRenameItem={(id, newName) => onRenameItem(id, newName, 'page')} // Specify type
+                  onDeleteItem={(id) => onDeleteItem(id, 'page')} // Specify type
                 />
               ))}
-            </ul>
+            </div>
 
             {/* Characters Section */}
-            <h4 className="sidebar-section-header">Characters</h4>
-            <ul className="directory-list">
-              <li className="directory-item entity" onClick={() => handleEntityClick(sampleCharacter)}>
-                <span className="item-icon">🧑</span> {/* Example icon */}
-                <span className="item-name">{sampleCharacter.name}</span>
-              </li>
-              {/* Add more characters here */}
-            </ul>
+            <div className="sidebar-section">
+              <div className="sidebar-section-header">
+                <h3>Characters</h3>
+              </div>
+              {characters.map(char => (
+                <SidebarItem
+                  key={char.id}
+                  item={{...char, type: 'character'}} // Assign type
+                  level={0}
+                  activePageId={activePageId} // Pass down but item won't be active unless selected
+                  onSelectItem={() => handleEntityClick(char)} // Use handleEntityClick for selection
+                  onRenameItem={(id, newName) => onRenameItem(id, newName, 'character')} // Specify type
+                  onDeleteItem={(id) => onDeleteItem(id, 'character')} // Specify type
+                />
+              ))}
+            </div>
 
             {/* Places Section */}
-            <h4 className="sidebar-section-header">Places</h4>
-            <ul className="directory-list">
-               <li className="directory-item entity" onClick={() => handleEntityClick(samplePlace)}>
-                 <span className="item-icon">🏞️</span> {/* Example icon */}
-                 <span className="item-name">{samplePlace.name}</span>
-               </li>
-              {/* Add more places here */}
-            </ul>
+            <div className="sidebar-section">
+              <div className="sidebar-section-header">
+                <h3>Places</h3>
+              </div>
+              {places.map(place => (
+                <SidebarItem
+                  key={place.id}
+                  item={{...place, type: 'place'}} // Assign type
+                  level={0}
+                  activePageId={activePageId}
+                  onSelectItem={() => handleEntityClick(place)} // Use handleEntityClick for selection
+                  onRenameItem={(id, newName) => onRenameItem(id, newName, 'place')} // Specify type
+                  onDeleteItem={(id) => onDeleteItem(id, 'place')} // Specify type
+                />
+              ))}
+            </div>
 
             {/* Items Section */}
-            <h4 className="sidebar-section-header">Items</h4>
-            <ul className="directory-list">
-              <li className="directory-item entity" onClick={() => handleEntityClick(sampleItem)}>
-                <span className="item-icon">🗡️</span> {/* Example icon */}
-                <span className="item-name">{sampleItem.name}</span>
-              </li>
-              {/* Add more items here */}
-            </ul>
+            <div className="sidebar-section">
+              <div className="sidebar-section-header">
+                <h3>Items</h3>
+              </div>
+              {items.map(item => (
+                <SidebarItem
+                  key={item.id}
+                  item={{...item, type: 'item'}} // Assign type
+                  level={0}
+                  activePageId={activePageId}
+                  onSelectItem={() => handleEntityClick(item)} // Use handleEntityClick for selection
+                  onRenameItem={(id, newName) => onRenameItem(id, newName, 'item')} // Specify type
+                  onDeleteItem={(id) => onDeleteItem(id, 'item')} // Specify type
+                />
+              ))}
+            </div>
           </div>
         </>
       )}
