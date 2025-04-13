@@ -4,17 +4,15 @@ import { Color } from "@tiptap/extension-color";
 import ListItem from "@tiptap/extension-list-item";
 import TextStyle from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
-import { EditorProvider, useCurrentEditor, BubbleMenu } from "@tiptap/react";
+import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { CommentMark } from "./CommentMark";
 import CommentViewComponent from "./CommentViewComponent";
 import LeftSidebar from './LeftSidebar';
 
-const MenuBar = () => {
-  const { editor } = useCurrentEditor();
-
+const MenuBar = ({ editor }) => {
   if (!editor) {
     return null;
   }
@@ -70,8 +68,7 @@ const MenuBar = () => {
   );
 };
 
-const SelectionMenu = () => {
-  const { editor } = useCurrentEditor();
+const SelectionMenu = ({ editor }) => {
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [commentText, setCommentText] = useState('');
 
@@ -139,51 +136,195 @@ const extensions = [
   }),
 ];
 
-const content = `
-<h2>
-  Hi there,
-</h2>
-<p>
-  this is a <em>basic</em> example of <strong>tiptap</strong>. Sure, there are all kind of basic text styles you'd probably expect from a text editor. But wait until you see the lists:
-</p>
-<ul>
-  <li>
-    That's a bullet list with one …
-  </li>
-  <li>
-    … or two list items.
-  </li>
-</ul>
-<p>
-  Isn't that great? And all of that is editable. But wait, there's more. Let's try a code block:
-</p>
-<pre><code class="language-css">body {
-display: none;
-}</code></pre>
-<p>
-  I know, I know, this is impressive. It's only the tip of the iceberg though. Give it a try and click a little bit around. Don't forget to check the other examples too.
-</p>
-<blockquote>
-  Wow, that's amazing. Good work, boy! 👏
-  <br />
-  — Mom
-</blockquote>
-`;
+// --- Initial Directory State ---
+const initialDirectoryData = [
+  {
+    id: uuidv4(),
+    name: 'Storyboard',
+    type: 'file',
+    content: '<h2>Storyboard Content</h2><p>This is the storyboard document.</p>',
+  },
+  {
+    id: uuidv4(),
+    name: 'Chapters',
+    type: 'folder',
+    isOpen: true, // Start open
+    children: [
+      {
+        id: uuidv4(),
+        name: 'Chapter 1: The Halter Be...',
+        type: 'file',
+        content: '<h2>Chapter 1</h2><p>Content for chapter 1.</p>',
+      },
+      {
+        id: uuidv4(),
+        name: 'Chapter 2: Brie & Bygones',
+        type: 'file',
+        content: '<h2>Chapter 2</h2><p>Content for chapter 2.</p>',
+      },
+      {
+        id: uuidv4(),
+        name: 'Chapter 3: The Doctor i...',
+        type: 'file',
+        content: '<h2>Chapter 3</h2><p>Content for chapter 3.</p>',
+      },
+    ],
+  },
+];
+
+// --- Helper function to toggle folder state immutably ---
+const toggleFolderRecursive = (items, folderId) => {
+  return items.map(item => {
+    if (item.id === folderId && item.type === 'folder') {
+      return { ...item, isOpen: !item.isOpen };
+    }
+    if (item.type === 'folder' && item.children) {
+      return { ...item, children: toggleFolderRecursive(item.children, folderId) };
+    }
+    return item;
+  });
+};
+
+// --- Helper function to add item immutably (at root level for now) ---
+const addItemToRoot = (items, newItem) => {
+  return [...items, newItem];
+};
+
+// --- Helper function to rename item immutably ---
+const renameItemRecursive = (items, itemId, newName) => {
+  return items.map(item => {
+    if (item.id === itemId) {
+      return { ...item, name: newName };
+    }
+    if (item.type === 'folder' && item.children) {
+      return { ...item, children: renameItemRecursive(item.children, itemId, newName) };
+    }
+    return item;
+  });
+};
+
+// --- Helper function to delete item immutably ---
+const deleteItemRecursive = (items, itemId) => {
+  return items.filter(item => {
+    if (item.id === itemId) {
+      return false; // Exclude this item
+    }
+    if (item.type === 'folder' && item.children) {
+      item.children = deleteItemRecursive(item.children, itemId);
+    }
+    return true; // Keep other items
+  });
+};
+
+// Initial content can be the first file's content or a default
+const initialContent = initialDirectoryData.find(item => item.type === 'file')?.content || '<p>Select a file from the sidebar.</p>';
 
 export const App = () => {
+  const [directoryData, setDirectoryData] = useState(initialDirectoryData);
+  const [activeItemId, setActiveItemId] = useState(initialDirectoryData.find(item => item.type === 'file')?.id || null);
+  const [editorContent, setEditorContent] = useState(initialContent);
+
+  const editor = useEditor({
+    extensions: extensions,
+    content: editorContent,
+  });
+
+  const handleSelectItem = useCallback((itemId) => {
+    setActiveItemId(itemId);
+    let selectedItem = null;
+    const findItem = (items) => {
+      for (const item of items) {
+        if (item.id === itemId) {
+          selectedItem = item;
+          return true;
+        }
+        if (item.type === 'folder' && item.children && findItem(item.children)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    findItem(directoryData);
+
+    if (selectedItem && selectedItem.type === 'file') {
+      const newContent = selectedItem.content || '<p>This file is empty.</p>';
+      if (editor) {
+        editor.commands.setContent(newContent);
+      }
+    }
+  }, [directoryData, editor]);
+
+  const handleToggleFolder = useCallback((folderId) => {
+    setDirectoryData(prevData => toggleFolderRecursive(prevData, folderId));
+  }, []);
+
+  const handleAddNewPage = useCallback(() => {
+    const newPage = {
+      id: uuidv4(),
+      name: 'Untitled Page',
+      type: 'file',
+      content: '<p>Start writing...</p>',
+    };
+    setDirectoryData(prevData => addItemToRoot(prevData, newPage));
+    setActiveItemId(newPage.id);
+    if (editor) {
+      editor.commands.setContent(newPage.content);
+    }
+  }, [editor]);
+
+  const handleAddNewFolder = useCallback(() => {
+    const newFolder = {
+      id: uuidv4(),
+      name: 'New Folder',
+      type: 'folder',
+      isOpen: true,
+      children: [],
+    };
+    setDirectoryData(prevData => addItemToRoot(prevData, newFolder));
+  }, []);
+
+  // --- Rename Handler ---
+  const handleRenameItem = useCallback((itemId, newName) => {
+    if (!newName.trim()) return; // Prevent empty names
+    setDirectoryData(prevData => renameItemRecursive(prevData, itemId, newName));
+  }, []);
+
+  // --- Delete Handler ---
+  const handleDeleteItem = useCallback((itemId) => {
+    // Optional: Add confirmation dialog here
+    console.log(`Attempting to delete item: ${itemId}`);
+    setDirectoryData(prevData => {
+        const newData = deleteItemRecursive(prevData, itemId);
+        // If the deleted item was the active one, deactivate/load default
+        if (activeItemId === itemId) {
+            setActiveItemId(null);
+            setEditorContent('<p>Select a file or create a new one.</p>');
+            if(editor) editor.commands.setContent('<p>Select a file or create a new one.</p>');
+        }
+        return newData;
+    });
+
+  }, [activeItemId, editor]); // Include activeItemId and editor dependencies
+
   return (
     <div className="app-container">
-      <LeftSidebar />
+      <LeftSidebar 
+        directoryData={directoryData}
+        activeItemId={activeItemId}
+        onSelectItem={handleSelectItem}
+        onToggleFolder={handleToggleFolder}
+        onAddNewPage={handleAddNewPage}
+        onAddNewFolder={handleAddNewFolder}
+        onRenameItem={handleRenameItem}   // Pass rename handler
+        onDeleteItem={handleDeleteItem}   // Pass delete handler
+      />
       <div className="main-content">
-        <EditorProvider
-          slotBefore={<MenuBar />}
-          extensions={extensions}
-          content={content}
-          className="tiptap-container"
-        >
-          <SelectionMenu />
-          <CommentViewComponent />
-        </EditorProvider>
+        <MenuBar editor={editor} />
+        <div className="tiptap-container">
+          <EditorContent editor={editor} />
+          {editor && <SelectionMenu editor={editor} />}
+          {editor && <CommentViewComponent editor={editor} />}
+        </div>
       </div>
     </div>
   );

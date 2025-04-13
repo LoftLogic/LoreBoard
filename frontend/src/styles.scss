@@ -483,21 +483,68 @@ body {
   padding: 0;
   margin: 0;
 
-  li {
-    padding: 6px 0;
+  .directory-item {
+    padding: 6px 10px 6px 0;
     cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
 
     &:hover {
+      background-color: rgba(#ffffff, 0.05);
       color: #ffffff;
     }
+
+    &.active {
+      background-color: rgba(#ffffff, 0.1);
+      color: #ffffff;
+      font-weight: 500;
+    }
+  }
+
+  .folder-arrow {
+    display: inline-block;
+    width: 16px;
+    margin-right: 4px;
+    text-align: center;
+    font-size: 10px;
+    color: rgba(#ffffff, 0.5);
+  }
+
+  .item-icon {
+    margin-right: 6px;
+  }
+
+  .item-name {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  li {
+    padding: 0;
+  }
+
+  .rename-input {
+    flex-grow: 1;
+    background-color: rgba(#ffffff, 0.15);
+    border: 1px solid rgba(#ffffff, 0.3);
+    border-radius: 3px;
+    color: #e6e6e6;
+    padding: 2px 4px;
+    margin-left: 2px;
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
   }
 
   .nested {
     list-style: none;
-    padding-left: 20px; /* Indent nested items */
+    padding-left: 0;
     margin: 0;
   }
 }
@@ -523,4 +570,33 @@ body {
   flex-grow: 1; /* Allow editor itself to fill space */
   min-height: initial; /* Remove min-height from body */
   /* Other tiptap styles remain */
+}
+
+/* --- Context Menu Styles --- */
+.context-menu {
+  position: fixed;
+  background-color: #3a3a3a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 120px;
+
+  ul {
+    list-style: none;
+    padding: 5px 0;
+    margin: 0;
+  }
+
+  li {
+    padding: 8px 15px;
+    cursor: pointer;
+    color: #c7c7c7;
+    font-size: 14px;
+
+    &:hover {
+      background-color: rgba(#ffffff, 0.1);
+      color: #ffffff;
+    }
+  }
 }

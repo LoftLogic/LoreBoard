@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useCurrentEditor } from '@tiptap/react';
 
-const CommentViewComponent = () => {
-  const { editor } = useCurrentEditor();
+const CommentViewComponent = ({ editor }) => {
   const [activeComment, setActiveComment] = useState(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [isEditing, setIsEditing] = useState(false);
