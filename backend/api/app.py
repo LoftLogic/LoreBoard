@@ -30,8 +30,12 @@ def create_entity(entity_type: str, entity_data: dict):
         "entity_data": entity_data
     }
     
-@app.post("/entities/update_entity/{passage_text}")
-def update_entity(passage_text: str, entity_data: dict):
+@app.post("/entities/update_entity")
+def update_entity(passage_texts: list[str], entity_data: dict):
     for ent in entities:
         if entity_data["name"] == ent.name:
-            entity = ent
+            ent.update(passage_texts)
+    return {
+        "message": "Entity created",
+        "entity_changed": entity_data["name"]
+        }

@@ -17,18 +17,32 @@ class ChapterMetaSheet:
     Represents a review of a previous chapter or section.
     """
     def __init__(self, name: str):
-        self.default_str = "To be created. Run update to get started."
         self.name = name
+        self.reset()
+        
+    def reset(self):
         self.plot_summary = self.default_str
         self.characters = self.default_str
         self.tone = self.default_str
         self.world = self.default_str
         self.themes = self.default_str
         self.viewer_enjoyment = self.default_str
+        self.initialized_flag = False
+        self.default_str = "To be created. Run update to get started."
         
-    def update(self):
+    def update(self, chapter: str):
         """
         Updates the metadata of the chapter.
         Can be considered an expensive operation.
         """
-        pass
+        self.initialized_flag = True
+        template: ChatPromptTemplate = generate_character_sheet(chapter)
+        
+        llm = ChatOpenAI(model='gpt-4o')
+        parser = JsonOutputParser()
+        
+        llm_chain = template | llm | parser
+                
+        print(chapter)
+        
+        return llm_chain.invoke({"chapter": chapter})

@@ -57,7 +57,7 @@ class Entity(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def update(self):
+    def update(self, passages: list[str]):
         """
         Updates the sheet for the specific entity.
         Invokes a specific LLM chain.
@@ -100,23 +100,26 @@ class Character(Entity):
         
         raise NotImplementedError
 
-    def update(self, passages):
+    def update(self, passages: list[str]):
         self.initialized_flag = True
+        passage_block = ""
+        
+        if isinstance(passages, list):
+            for i in range(len(passages)):
+                passage_block += passages[i]
+                if i > 0 and i < len(passages) - 1:
+                    passage_block += "\n"
+                    passage_block += "======================"
+                    passage_block += "\n"
+                    
+        print(passage_block)
+        
         template: ChatPromptTemplate = generate_character_sheet(passages, self.name, self.aliases)
         llm = ChatOpenAI(model='gpt-4o')
         parser = JsonOutputParser()
-        
+                
         llm_chain = template | llm | parser
-        
-        passage_block = ""
-        
-        for i in range(len(passages)):
-            passage_block += passages[i]
-            if i > 0 and i < len(passages) - 1:
-                passage_block += "\n"
-                passage_block += "======================"
-                passage_block += "\n"
-        
+
         return llm_chain.invoke({"passage_block": passage_block})
 
     def as_dict(self) -> dict:
@@ -131,11 +134,6 @@ class Character(Entity):
     
     def as_json(self) -> str:
         return json.dumps(self.as_dict, indent=4)
-
-
-
-
-
     
 class Setting(Entity):
     """
@@ -241,4 +239,4 @@ His plate was just the way he liked- three pastries in a triangle, one with cust
 	“Good, good! I’m very proud of you. Now, Achilles” She looked at him, with a strong sense of admiration. “Wake Up!”
     """
     
-    print(json.dumps(char.update(passage), indent=4))
+    print(json.dumps(char.update([passage]), indent=4))
