@@ -35,24 +35,25 @@ def generate_character_sheet(character: str, aliases: set[str]) -> ChatPromptTem
     As such, recorded information should not just be a verbatim copy from the lines from the text.
     
     You are to primarily record the following infromation about {character}:
-    - Basic Role: Essentially, who this person is and what are their most relevant information to the story, in one or two short sentences.
     - Physical Descriptions: Such as size, hair color, facial characteristics, and any discernable physical traits.
     - Personality Descriptions: Such as their speaking style, outward demeanor, inner psycholgical complexities, and anything about the mind of the characters.
     Also record the following, if applicable. If not applicable (in the instance the character is minor or the text does not cover these), simply put 'Not Applicable'.
-    - Stake in story: Main motivations and what they have to gain/lose
+    - Goals: Main motivations and what they have to gain/lose.
+    - Background: Any contextual information about the characters background or standing, if applicable.
     - Change/Development: Changes in this character's persona, and the growth they undergo.
     - Relationships: Core relationships with other characters, including family, friends, enemies, and lovers.
     
     Your output should adhere to this format:
     {{
         "Character": {character},
-        "Basic Role": "{{Character information here}}",
         "Physical Descriptions": "{{Character information here}}",
         "Personality Descriptions": "{{Character information here}}",
-        "Stake in the Story": "{{Character information here (if applicable)}}",
+        "Goals": "{{Character information here (if applicable)}}",
+        "Background": "{{Character information here (if applicable)}}",
         "Change/Development": "{{Character information here (if applicable)}}",
         "Relationships": "{{Character information here (if applicable)}}"
     }}
+    
     """
 
     template_message = [SystemMessagePromptTemplate(prompt=PromptTemplate(
@@ -87,6 +88,8 @@ def add_to_character_sheet(character: str, aliases: set[str]) -> ChatPromptTempl
             recognition_str += alias + ", "
         recognition_str = recognition_str[:-2]    
         
+    # Add later: - Basic Role: Essentially, who this person is and what are their most relevant information to the story, in one or two short sentences.
+    
     template_str = """
     # Prompt
     
@@ -101,11 +104,11 @@ def add_to_character_sheet(character: str, aliases: set[str]) -> ChatPromptTempl
     {last_sheet}
     
     You are to primarily record the following infromation about {character}:
-    - Basic Role: Essentially, who this person is and what are their most relevant information to the story, in one or two short sentences.
     - Physical Descriptions: Such as size, hair color, facial characteristics, and any discernable physical traits.
     - Personality Descriptions: Such as their speaking style, outward demeanor, inner psycholgical complexities, and anything about the mind of the characters.
     Also record the following, if applicable. If not applicable (in the instance the character is minor or the text does not cover these), simply put 'Not Applicable'.
-    - Stake in story: Main motivations and what they have to gain/lose
+    - Goals: Main motivations and what they have to gain/lose.
+    - Background: Any contextual information about the characters background or standing, if applicable.
     - Change/Development: Changes in this character's persona, and the growth they undergo.
     - Relationships: Core relationships with other characters, including family, friends, enemies, and lovers.
     
@@ -115,10 +118,10 @@ def add_to_character_sheet(character: str, aliases: set[str]) -> ChatPromptTempl
     Your output should adhere to this format:
     {{
         "Character": {character},
-        "Basic Role": "{{Character information here}}",
         "Physical Descriptions": "{{Character information here}}",
         "Personality Descriptions": "{{Character information here}}",
-        "Stake in the Story": "{{Character information here (if applicable)}}",
+        "Goals": "{{Character information here (if applicable)}}",
+        "Background": "{{Character information here (if applicable)}}",
         "Change/Development": "{{Character information here (if applicable)}}",
         "Relationships": "{{Character information here (if applicable)}}"
     }}

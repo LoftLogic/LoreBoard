@@ -89,11 +89,12 @@ class Character(Entity):
     def reset(self):
         self.initialized_flag = False
         self.aliases = {self.name}
-        self.basic_role: str = "Basic Role:\n To be created. (Call an update to create)"
+        
         self.physical_traits: str = "Physical Traits:\n To be created. (Call an update to create)"
         self.personality_traits: str = "Personality Traits:\n To be created. (Call an update to create)"
-        self.stake: str = "Stake:\n To be created. (Call an update to create)"
-        self.development: str = "Actions:\n To be created. (Call an update to create)"
+        self.goals: str = "Goals:\n To be created. (Call an update to create)"
+        self.background: str = "Background:\n To be Created (Call an update to create)"
+        self.development: str = "Development:\n To be created. (Call an update to create)"
         self.relationships: str = "Relationships: To be created. (Call an update to create)"
         
         self.initial_template: ChatPromptTemplate = generate_character_sheet(self.name, self.aliases)
@@ -131,10 +132,10 @@ class Character(Entity):
             result = self.initial_chain.invoke({"passage_block": passage_block})
 
         try:
-            self.basic_role = result["Basic Role"]
             self.physical_traits = result["Physical Descriptions"]
             self.personality_traits = result["Personality Descriptions"]
-            self.stake = result["Stake in the Story"]
+            self.goals = result["Goals"]
+            self.background = result["Background"]
             self.development = result["Change/Development"]
             self.relationships = result["Relationships"]
         except Exception as e:
@@ -145,10 +146,11 @@ class Character(Entity):
     def as_dict(self) -> dict:
         character_dict = {
                 "name": self.name,
-                "physical_traits": self.physical_traits,
-                "personality_traits": self.personality_traits,
-                "actions": self.actions,
-                "relationships": self.relationships,
+                "Physical Descriptions": self.physical_traits,
+                "Personality Descriptions": self.personality_traits,
+                "Goals": self.goals,
+                "Change/Deveopment": self.development,
+                "Relationships": self.relationships,
         }
         return character_dict
     
