@@ -388,3 +388,139 @@ body {
      padding: 0;
   }
 }
+
+/* --- Left Sidebar Styles --- */
+.app-container {
+  display: flex;
+  height: 100vh; /* Ensure container takes full height */
+}
+
+.left-sidebar {
+  width: 250px;
+  background-color: #252525; /* Slightly lighter than main background */
+  border-right: 1px solid #3a3a3a;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  overflow: hidden; /* Hide content during collapse */
+  height: 100%; /* Take full height of container */
+  color: #c7c7c7; /* Lighter text for sidebar */
+}
+
+.left-sidebar.collapsed {
+  width: 50px;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #3a3a3a;
+  flex-shrink: 0; /* Prevent header from shrinking */
+  min-height: 36px; /* Match editor button height */
+  box-sizing: border-box;
+}
+
+.sidebar-header span {
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.collapse-button {
+  background: none;
+  border: none;
+  color: #c7c7c7;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 5px;
+  line-height: 1;
+
+  &:hover {
+    color: #ffffff;
+  }
+}
+
+.sidebar-actions {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid #3a3a3a;
+  flex-shrink: 0; /* Prevent actions from shrinking */
+}
+
+.sidebar-button {
+  background-color: rgba(#ffffff, 0.08);
+  border: 1px solid rgba(#ffffff, 0.15);
+  color: #c7c7c7;
+  padding: 8px 12px;
+  border-radius: 4px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(#ffffff, 0.15);
+    color: #ffffff;
+  }
+}
+
+.sidebar-content {
+  padding: 10px;
+  overflow-y: auto; /* Allow scrolling for long lists */
+  flex-grow: 1; /* Allow content to take remaining space */
+}
+
+.directory-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    padding: 6px 0;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:hover {
+      color: #ffffff;
+    }
+  }
+
+  .nested {
+    list-style: none;
+    padding-left: 20px; /* Indent nested items */
+    margin: 0;
+  }
+}
+
+/* --- Main Content Area --- */
+.main-content {
+  flex-grow: 1; /* Take remaining width */
+  overflow-y: auto; /* Allow editor content to scroll if needed */
+  padding: 1rem; /* Re-apply padding here instead of body */
+  height: 100%;
+  display: flex; /* Use flex to manage editor height */
+  flex-direction: column;
+}
+
+/* Adjust Tiptap to fit within main-content */
+.tiptap-container {
+  flex-grow: 1; /* Allow editor provider to fill space */
+  display: flex;
+  flex-direction: column;
+}
+
+.tiptap {
+  flex-grow: 1; /* Allow editor itself to fill space */
+  min-height: initial; /* Remove min-height from body */
+  /* Other tiptap styles remain */
+}

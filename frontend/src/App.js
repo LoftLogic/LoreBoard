@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { CommentMark } from "./CommentMark";
 import CommentViewComponent from "./CommentViewComponent";
+import LeftSidebar from './LeftSidebar';
 
 const MenuBar = () => {
   const { editor } = useCurrentEditor();
@@ -171,14 +172,20 @@ display: none;
 
 export const App = () => {
   return (
-    <EditorProvider
-      slotBefore={<MenuBar />}
-      extensions={extensions}
-      content={content}
-    >
-      <SelectionMenu />
-      <CommentViewComponent />
-    </EditorProvider>
+    <div className="app-container">
+      <LeftSidebar />
+      <div className="main-content">
+        <EditorProvider
+          slotBefore={<MenuBar />}
+          extensions={extensions}
+          content={content}
+          className="tiptap-container"
+        >
+          <SelectionMenu />
+          <CommentViewComponent />
+        </EditorProvider>
+      </div>
+    </div>
   );
 };
 
