@@ -1,7 +1,4 @@
 # Dependencies
-node_modules
-node_modules/
-**/node_modules
 **/node_modules/
 /.pnp
 .pnp.js
@@ -33,10 +30,11 @@ yarn-debug.log*
 yarn-error.log*
 
 # Cache files
-.cache/
 **/.cache/
-*.pack
-*.pack.old
 
 # Backup files
 /.code_backups
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
