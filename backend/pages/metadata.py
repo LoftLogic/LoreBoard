@@ -21,6 +21,7 @@ class ChapterMetaSheet:
         self.reset()
         
     def reset(self):
+        self.default_str = "To be created. Run update to get started."
         self.plot_summary = self.default_str
         self.characters = self.default_str
         self.tone = self.default_str
@@ -28,7 +29,6 @@ class ChapterMetaSheet:
         self.themes = self.default_str
         self.viewer_enjoyment = self.default_str
         self.initialized_flag = False
-        self.default_str = "To be created. Run update to get started."
         
     def update(self, chapter: str):
         """

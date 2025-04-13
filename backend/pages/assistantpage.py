@@ -111,8 +111,6 @@ class Character(Entity):
                     passage_block += "\n"
                     passage_block += "======================"
                     passage_block += "\n"
-                    
-        print(passage_block)
         
         template: ChatPromptTemplate = generate_character_sheet(passages, self.name, self.aliases)
         llm = ChatOpenAI(model='gpt-4o')

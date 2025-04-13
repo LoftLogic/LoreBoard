@@ -32,7 +32,7 @@ def generate_character_sheet(passages: list[str], character: str, aliases: set[s
     Your job is to record information about the character {{character}}. 
     {{recognition_str}}
     The information your record should serve as brief notes on what the writer has written so far, and will be used later for reference.
-    As such, recorded information should be densely informative and 
+    As such, recorded information should not just be a verbatim copy from the lines from the text.
     
     You are to primarily record the following infromation about {{character}}:
     - Basic Role: Essentially, who this person is and what are their most relevant information to the story, in one or two short sentences.
