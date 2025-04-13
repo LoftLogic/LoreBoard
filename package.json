@@ -1,0 +1,11 @@
+{
+  "name": "loreboard-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:frontend": "cd frontend && npm install",
+    "start:frontend": "cd frontend && npm start",
+    "build:frontend": "cd frontend && npm run build",
+    "test:frontend": "cd frontend && npm test"
+  }
+} 

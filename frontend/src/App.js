@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CommentMark } from "./CommentMark";
 import CommentViewComponent from "./CommentViewComponent";
 import LeftSidebar from './LeftSidebar';
+import RightChatPanel from './RightChatPanel';
 
 const MenuBar = ({ editor }) => {
   if (!editor) {
@@ -91,16 +92,46 @@ const SelectionMenu = ({ editor }) => {
     }
   };
 
+  const handleTrackEntity = (entityType) => {
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to);
+    console.log(`Track Entity Clicked: Type=${entityType}, Text='${selectedText}'`);
+    // Placeholder: In the future, this will trigger state update and potentially backend calls
+  };
+
   return (
     <BubbleMenu className="bubble-menu" editor={editor} tippyOptions={{ duration: 100 }}>
       {!showCommentInput ? (
-        <button
-          onClick={() => setShowCommentInput(true)}
-          className="bubble-menu-button"
-          title="Add Comment"
-        >
-          💬
-        </button>
+        <>
+          <button
+            onClick={() => setShowCommentInput(true)}
+            className="bubble-menu-button"
+            title="Add Comment"
+          >
+            💬
+          </button>
+          <button
+            onClick={() => handleTrackEntity('Character')}
+            className="bubble-menu-button"
+            title="Track Character"
+          >
+            👤
+          </button>
+          <button
+            onClick={() => handleTrackEntity('Place')}
+            className="bubble-menu-button"
+            title="Track Place"
+          >
+            🌍
+          </button>
+          <button
+            onClick={() => handleTrackEntity('Item')}
+            className="bubble-menu-button"
+            title="Track Item"
+          >
+            📦
+          </button>
+        </>
       ) : (
         <div className="bubble-comment-input">
           <textarea
@@ -326,6 +357,7 @@ export const App = () => {
           {editor && <CommentViewComponent editor={editor} />}
         </div>
       </div>
+      <RightChatPanel />
     </div>
   );
 };
