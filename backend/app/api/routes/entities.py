@@ -119,24 +119,30 @@ def get_entity(
     
     return entity
 
-# Get all entities endpoint
-@router.get("/entities", response_model=Dict[str, List[Any]])
+@router.get("/entities", response_model=schemas.AllEntitiesResponse)
 def get_all_entities(
     entity_type: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     print("tryna get all entities")
-    result = {}
+    result = schemas.AllEntitiesResponse(
+        characters=[],
+        places=[],
+        items=[]
+    )
     
     # Get entities based on type filter
     if not entity_type or entity_type == "character":
-        result["characters"] = crud.get_all_characters(db)
+        characters = crud.get_all_characters(db)
+        result.characters = [schemas.CharacterSummary(id=char.id, name=char.name) for char in characters]
     
     if not entity_type or entity_type == "place":
-        result["places"] = crud.get_all_places(db)
+        places = crud.get_all_places(db)
+        result.places = [schemas.PlaceSummary(id=place.id, name=place.name) for place in places]
     
     if not entity_type or entity_type == "item":
-        result["items"] = crud.get_all_items(db)
+        items = crud.get_all_items(db)
+        result.items = [schemas.ItemSummary(id=item.id, name=item.name) for item in items]
     
     return result
 

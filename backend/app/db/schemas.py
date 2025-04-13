@@ -112,3 +112,26 @@ class DetectedEntity(BaseModel):
 
 class EntityDetectionResponse(BaseModel):
     entities: List[DetectedEntity]
+
+
+
+class EntityBase(BaseModel):
+    id: int
+    name: str
+    
+    class Config:
+        orm_mode = True
+
+class CharacterSummary(EntityBase):
+    pass
+
+class PlaceSummary(EntityBase):
+    pass
+
+class ItemSummary(EntityBase):
+    pass
+
+class AllEntitiesResponse(BaseModel):
+    characters: List[CharacterSummary] = []
+    places: List[PlaceSummary] = []
+    items: List[ItemSummary] = []
