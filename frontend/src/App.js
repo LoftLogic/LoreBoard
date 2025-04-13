@@ -32,6 +32,13 @@ const MenuBar = () => {
         H2
       </button>
       <button
+        onClick={() => editor.chain().focus().setParagraph().run()}
+        className={editor.isActive("paragraph") ? "is-active" : ""}
+        title="Body Text"
+      >
+        ¶
+      </button>
+      <button
         onClick={() => editor.chain().focus().toggleBold().run()}
         disabled={!editor.can().chain().focus().toggleBold().run()}
         className={editor.isActive("bold") ? "is-active" : ""}
@@ -45,7 +52,7 @@ const MenuBar = () => {
         className={editor.isActive("italic") ? "is-active" : ""}
         title="Italic"
       >
-        I
+        <em>I</em>
       </button>
       <button
         onClick={() => editor.chain().focus().toggleUnderline().run()}
@@ -53,7 +60,7 @@ const MenuBar = () => {
         className={editor.isActive("underline") ? "is-active" : ""}
         title="Underline"
       >
-        U
+        <u>U</u>
       </button>
     </div>
   );

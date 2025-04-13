@@ -1986,6 +1986,11 @@
   resolved "https://registry.npmjs.org/@tiptap/extension-heading/-/extension-heading-2.1.13.tgz"
   integrity sha512-PEmc19QLmlVUTiHWoF0hpgNTNPNU0nlaFmMKskzO+cx5Df4xvHmv/UqoIwp7/UFbPMkfVJT1ozQU7oD1IWn9Hg==
 
+"@tiptap/extension-highlight@^2.11.7":
+  version "2.11.7"
+  resolved "https://registry.npmjs.org/@tiptap/extension-highlight/-/extension-highlight-2.11.7.tgz"
+  integrity sha512-c/NH4kIpNOWCUQv8RkFNDyOcgt+2pYFpDf0QBJmzhAuv4BIeS2bDmDtuNS7VgoWRZH+xxCNXfvm2BG+kjtipEg==
+
 "@tiptap/extension-history@^2.1.13":
   version "2.1.13"
   resolved "https://registry.npmjs.org/@tiptap/extension-history/-/extension-history-2.1.13.tgz"
