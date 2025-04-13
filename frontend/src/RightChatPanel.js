@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const RightChatPanel = () => {
+const RightChatPanel = ({ isCollapsed, onToggleCollapse }) => {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]); // Now stores message objects { sender: 'user'|'ai', text: '...'}
   const [showContextPlaceholder, setShowContextPlaceholder] = useState(false); // State for placeholder visibility
@@ -36,40 +36,54 @@ const RightChatPanel = () => {
   };
 
   return (
-    <div className="right-chat-panel">
-      <div className="chat-messages">
-        {messages.map((message, index) => (
-          <div key={index} className={`chat-message ${message.sender === 'user' ? 'user-message' : 'ai-message'}`}>
-            <p>{message.text}</p>
+    <div className={`right-chat-panel ${isCollapsed ? 'collapsed' : ''}`}>
+      <div className="sidebar-header chat-header">
+        {!isCollapsed && <span>AI Chat</span>}
+        <button
+          onClick={onToggleCollapse}
+          className="collapse-button"
+          title={isCollapsed ? "Expand Chat" : "Collapse Chat"}
+        >
+          {isCollapsed ? '«' : '»'}
+        </button>
+      </div>
+
+      {!isCollapsed && (
+        <>
+          <div className="chat-messages">
+            {messages.map((message, index) => (
+              <div key={index} className={`chat-message ${message.sender === 'user' ? 'user-message' : 'ai-message'}`}>
+                <p>{message.text}</p>
+              </div>
+            ))}
+            <div ref={messagesEndRef} /> {/* Invisible element to scroll to */}
           </div>
-        ))}
-        <div ref={messagesEndRef} /> {/* Invisible element to scroll to */}
-      </div>
-      <div className="chat-input-area">
-        <button onClick={handleAddContext} className="add-context-button" title="Add Context">
-          +
-        </button>
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Ask LoreBoard AI..."
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              handleSendMessage();
-            }
-          }}
-          onClick={() => setShowContextPlaceholder(false)} // Hide placeholder when clicking input
-        />
-        <button onClick={handleSendMessage} className="send-message-button" title="Send Message">
-          ➤
-        </button>
-      </div>
-      {/* Conditional Placeholder Text */}
-      {showContextPlaceholder && (
-        <div className="context-placeholder">
-          Context options will be added later.
-        </div>
+          <div className="chat-input-area">
+            <button onClick={handleAddContext} className="add-context-button" title="Add Context">
+              +
+            </button>
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Ask LoreBoard AI..."
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSendMessage();
+                }
+              }}
+              onClick={() => setShowContextPlaceholder(false)} // Hide placeholder when clicking input
+            />
+            <button onClick={handleSendMessage} className="send-message-button" title="Send Message">
+              ➤
+            </button>
+          </div>
+          {showContextPlaceholder && (
+            <div className="context-placeholder">
+              Context options will be added later.
+            </div>
+          )}
+        </>
       )}
     </div>
   );

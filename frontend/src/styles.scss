@@ -10,8 +10,9 @@ body {
   font-family: sans-serif;
   line-height: 1.4;
   color: #e6e6e6;
-  padding: 1rem;
-  min-height: 100vh;
+  /* Remove padding and min-height, handled by app-container now */
+  /* padding: 1rem; */
+  /* min-height: 100vh; */
 }
 
 /* Editor menu styling */
@@ -396,6 +397,7 @@ body {
   overflow: hidden; /* Prevent scrolling at the app level */
   background-color: #282c34; /* Dark background for the whole app */
   color: #abb2bf; /* Light text color */
+  box-sizing: border-box; /* Ensure padding/border included in height */
 }
 
 /* --- Left Sidebar --- */
@@ -409,6 +411,7 @@ body {
   overflow: hidden; /* Hide content during collapse */
   height: 100%; /* Take full height of container */
   color: #c7c7c7; /* Lighter text for sidebar */
+  box-sizing: border-box; /* Include padding/border */
 }
 
 .left-sidebar.collapsed {
@@ -510,15 +513,6 @@ body {
     }
   }
 
-  .folder-arrow {
-    display: inline-block;
-    width: 16px;
-    margin-right: 4px;
-    text-align: center;
-    font-size: 10px;
-    color: rgba(#ffffff, 0.5);
-  }
-
   .item-icon {
     margin-right: 6px;
   }
@@ -545,12 +539,6 @@ body {
     font-size: inherit;
     outline: none;
   }
-
-  .nested {
-    list-style: none;
-    padding-left: 0;
-    margin: 0;
-  }
 }
 
 /* --- Main Content Area --- */
@@ -561,6 +549,7 @@ body {
   height: 100%;
   display: flex; /* Use flex to manage editor height */
   flex-direction: column;
+  box-sizing: border-box; /* Include padding/border */
 }
 
 /* Adjust Tiptap to fit within main-content */
@@ -584,6 +573,27 @@ body {
   display: flex;
   flex-direction: column;
   background-color: #21252b; /* Slightly different background */
+  overflow: hidden; /* Prevent children from overflowing the panel */
+  box-sizing: border-box; /* Include padding/border */
+  transition: width 0.3s ease; /* Add transition like left sidebar */
+
+  &.collapsed {
+    width: 50px; /* Same collapsed width as left sidebar */
+
+    .chat-header {
+      // Ensure header content aligns correctly when collapsed
+      justify-content: center; 
+    }
+  }
+}
+
+.chat-header {
+  // Reuse sidebar-header styles, but ensure collapse button is on the left
+  // .sidebar-header already handles flex, padding, border, etc.
+  .collapse-button {
+    order: -1; // Move button to the left side for right panel
+    margin-right: auto; // Push title away when visible
+  }
 }
 
 .chat-messages {
@@ -1111,4 +1121,107 @@ body {
       color: #ffffff;
     }
   }
+}
+
+/* Add styles for the Left Sidebar Entity Sections and Popup */
+.sidebar-section-header {
+  font-size: 0.9em; /* Slightly smaller than default */
+  font-weight: bold;
+  margin: 15px 10px 5px 15px; /* Add some spacing */
+  color: #ccc; /* Lighter color */
+  text-transform: uppercase; /* Optional: Make headers uppercase */
+}
+
+.directory-item.entity {
+  cursor: pointer; /* Indicate clickable */
+}
+
+.directory-item.entity:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Subtle hover effect */
+}
+
+/* Entity Popup Styles */
+.entity-popup-overlay {
+  position: fixed; /* Cover the whole screen */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above other content */
+}
+
+.entity-popup-content {
+  background-color: #2e2e2e; /* Dark background for the popup */
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 300px; /* Minimum width */
+  max-width: 500px; /* Maximum width */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative; /* Needed for absolute positioning of the close button */
+  color: #e0e0e0; /* Light text color */
+}
+
+.close-popup-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.close-popup-button:hover {
+  color: #fff;
+}
+
+.entity-popup-content h2 {
+  margin-top: 0;
+  color: #fff; /* White heading */
+  border-bottom: 1px solid #444; /* Separator line */
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.entity-popup-content p {
+  color: #ccc; /* Slightly lighter paragraph text */
+}
+
+/* Styles for entity fields inside the popup */
+.entity-fields-container {
+  margin-top: 15px; /* Space below the header */
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between fields */
+}
+
+.entity-field {
+  display: flex;
+  flex-direction: column; /* Stack label above value */
+  gap: 3px; /* Space between label and value */
+  padding-bottom: 8px;
+  border-bottom: 1px solid #404040; /* Subtle separator */
+}
+
+.entity-field:last-child {
+  border-bottom: none; /* No border for the last item */
+}
+
+.field-label {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: #aaa; /* Slightly muted label color */
+  text-transform: uppercase;
+}
+
+.field-value {
+  font-size: 1em;
+  color: #e0e0e0; /* Main text color */
+  white-space: pre-wrap; /* Respect newlines in the data */
+  word-break: break-word; /* Break long words */
 }

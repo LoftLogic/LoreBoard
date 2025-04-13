@@ -167,127 +167,86 @@ const extensions = [
   }),
 ];
 
-// --- Initial Directory State ---
-const initialDirectoryData = [
+// --- Initial Page State ---
+const initialPages = [
   {
     id: uuidv4(),
     name: 'Storyboard',
-    type: 'file',
-    content: '<h2>Storyboard Content</h2><p>This is the storyboard document.</p>',
+    type: 'file', // Keep type for consistency, though everything is a file now
+    content: '<h2>Storyboard Content</h2><p>Initial storyboard content.</p>',
   },
   {
     id: uuidv4(),
-    name: 'Chapters',
-    type: 'folder',
-    isOpen: true, // Start open
-    children: [
-      {
-        id: uuidv4(),
-        name: 'Chapter 1: The Halter Be...',
-        type: 'file',
-        content: '<h2>Chapter 1</h2><p>Content for chapter 1.</p>',
-      },
-      {
-        id: uuidv4(),
-        name: 'Chapter 2: Brie & Bygones',
-        type: 'file',
-        content: '<h2>Chapter 2</h2><p>Content for chapter 2.</p>',
-      },
-      {
-        id: uuidv4(),
-        name: 'Chapter 3: The Doctor i...',
-        type: 'file',
-        content: '<h2>Chapter 3</h2><p>Content for chapter 3.</p>',
-      },
-    ],
+    name: 'Chapter 1',
+    type: 'file',
+    content: '<h2>Chapter 1</h2><p>Start your first chapter here.</p>',
   },
 ];
 
-// --- Helper function to toggle folder state immutably ---
-const toggleFolderRecursive = (items, folderId) => {
-  return items.map(item => {
-    if (item.id === folderId && item.type === 'folder') {
-      return { ...item, isOpen: !item.isOpen };
+// --- Removed recursive helper functions for folders ---
+
+// --- Simplified Add Page function ---
+const addPage = (pages, newPage) => {
+  return [...pages, newPage];
+};
+
+// --- Simplified Rename Page function ---
+const renamePage = (pages, pageId, newName) => {
+  return pages.map(page => {
+    if (page.id === pageId) {
+      return { ...page, name: newName };
     }
-    if (item.type === 'folder' && item.children) {
-      return { ...item, children: toggleFolderRecursive(item.children, folderId) };
-    }
-    return item;
+    return page;
   });
 };
 
-// --- Helper function to add item immutably (at root level for now) ---
-const addItemToRoot = (items, newItem) => {
-  return [...items, newItem];
+// --- Simplified Delete Page function ---
+const deletePage = (pages, pageId) => {
+  return pages.filter(page => page.id !== pageId);
 };
 
-// --- Helper function to rename item immutably ---
-const renameItemRecursive = (items, itemId, newName) => {
-  return items.map(item => {
-    if (item.id === itemId) {
-      return { ...item, name: newName };
-    }
-    if (item.type === 'folder' && item.children) {
-      return { ...item, children: renameItemRecursive(item.children, itemId, newName) };
-    }
-    return item;
-  });
-};
-
-// --- Helper function to delete item immutably ---
-const deleteItemRecursive = (items, itemId) => {
-  return items.filter(item => {
-    if (item.id === itemId) {
-      return false; // Exclude this item
-    }
-    if (item.type === 'folder' && item.children) {
-      item.children = deleteItemRecursive(item.children, itemId);
-    }
-    return true; // Keep other items
-  });
-};
-
-// Initial content can be the first file's content or a default
-const initialContent = initialDirectoryData.find(item => item.type === 'file')?.content || '<p>Select a file from the sidebar.</p>';
+// --- Initial content set from the first default page ---
+const initialContent = initialPages[0]?.content || '<p>Select a page from the sidebar.</p>';
 
 export const App = () => {
-  const [directoryData, setDirectoryData] = useState(initialDirectoryData);
-  const [activeItemId, setActiveItemId] = useState(initialDirectoryData.find(item => item.type === 'file')?.id || null);
+  const [pages, setPages] = useState(initialPages);
+  const [activePageId, setActivePageId] = useState(initialPages[0]?.id || null);
   const [editorContent, setEditorContent] = useState(initialContent);
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false); // State for chat collapse
 
   const editor = useEditor({
     extensions: extensions,
     content: editorContent,
+    // Update content when activePageId changes and it's valid
+    onUpdate: ({ editor }) => {
+        const updatedContent = editor.getHTML();
+        setPages(currentPages =>
+            currentPages.map(page =>
+                page.id === activePageId ? { ...page, content: updatedContent } : page
+            )
+        );
+        setEditorContent(updatedContent); // Keep local editor state sync (optional)
+    }
   });
 
-  const handleSelectItem = useCallback((itemId) => {
-    setActiveItemId(itemId);
-    let selectedItem = null;
-    const findItem = (items) => {
-      for (const item of items) {
-        if (item.id === itemId) {
-          selectedItem = item;
-          return true;
-        }
-        if (item.type === 'folder' && item.children && findItem(item.children)) {
-          return true;
-        }
-      }
-      return false;
-    };
-    findItem(directoryData);
-
-    if (selectedItem && selectedItem.type === 'file') {
-      const newContent = selectedItem.content || '<p>This file is empty.</p>';
-      if (editor) {
+  // Update editor content when active page changes
+  useEffect(() => {
+    const activePage = pages.find(page => page.id === activePageId);
+    const newContent = activePage?.content || '<p>Select a page or create a new one.</p>';
+    if (editor && editor.getHTML() !== newContent) { // Avoid unnecessary updates
+        // Need to ensure the editor instance is ready before setting content
+        // A simple check for editor might suffice, or use editor.isEditable
         editor.commands.setContent(newContent);
-      }
     }
-  }, [directoryData, editor]);
+    setEditorContent(newContent); // Update local state too
+  }, [activePageId, pages, editor]); // Add editor to dependencies
 
-  const handleToggleFolder = useCallback((folderId) => {
-    setDirectoryData(prevData => toggleFolderRecursive(prevData, folderId));
+  const handleSelectPage = useCallback((pageId) => { // Renamed handler
+    setActivePageId(pageId);
+    // Content update is now handled by useEffect
   }, []);
+
+  // --- Removed handleToggleFolder --- 
 
   const handleAddNewPage = useCallback(() => {
     const newPage = {
@@ -296,58 +255,50 @@ export const App = () => {
       type: 'file',
       content: '<p>Start writing...</p>',
     };
-    setDirectoryData(prevData => addItemToRoot(prevData, newPage));
-    setActiveItemId(newPage.id);
-    if (editor) {
-      editor.commands.setContent(newPage.content);
-    }
-  }, [editor]);
+    setPages(prevPages => addPage(prevPages, newPage)); // Use simplified function
+    setActivePageId(newPage.id);
+    // Content update is now handled by useEffect
+  }, []); // Removed editor dependency as useEffect handles content
 
-  const handleAddNewFolder = useCallback(() => {
-    const newFolder = {
-      id: uuidv4(),
-      name: 'New Folder',
-      type: 'folder',
-      isOpen: true,
-      children: [],
-    };
-    setDirectoryData(prevData => addItemToRoot(prevData, newFolder));
-  }, []);
+  // --- Removed handleAddNewFolder --- 
 
-  // --- Rename Handler ---
-  const handleRenameItem = useCallback((itemId, newName) => {
+  // --- Rename Handler (Simplified) ---
+  const handleRenamePage = useCallback((pageId, newName) => { // Renamed handler
     if (!newName.trim()) return; // Prevent empty names
-    setDirectoryData(prevData => renameItemRecursive(prevData, itemId, newName));
+    setPages(prevPages => renamePage(prevPages, pageId, newName)); // Use simplified function
   }, []);
 
-  // --- Delete Handler ---
-  const handleDeleteItem = useCallback((itemId) => {
-    // Optional: Add confirmation dialog here
-    console.log(`Attempting to delete item: ${itemId}`);
-    setDirectoryData(prevData => {
-        const newData = deleteItemRecursive(prevData, itemId);
-        // If the deleted item was the active one, deactivate/load default
-        if (activeItemId === itemId) {
-            setActiveItemId(null);
-            setEditorContent('<p>Select a file or create a new one.</p>');
-            if(editor) editor.commands.setContent('<p>Select a file or create a new one.</p>');
-        }
-        return newData;
-    });
+  // --- Delete Handler (Simplified) ---
+  const handleDeletePage = useCallback((pageId) => { // Renamed handler
+    console.log(`Attempting to delete page: ${pageId}`);
+    let newActivePageId = activePageId;
+    const remainingPages = deletePage(pages, pageId); 
 
-  }, [activeItemId, editor]); // Include activeItemId and editor dependencies
+    if (activePageId === pageId) {
+        // If the active page was deleted, select the first remaining page or null
+        newActivePageId = remainingPages.length > 0 ? remainingPages[0].id : null;
+        setActivePageId(newActivePageId);
+        // Let useEffect handle content update for the new active page
+    }
+    setPages(remainingPages); // Update the pages state
+
+  }, [activePageId, pages]); // Removed editor dependency
+
+  // Handler to toggle chat collapse state
+  const handleToggleChatCollapse = useCallback(() => {
+    setIsChatCollapsed(prev => !prev);
+  }, []);
 
   return (
     <div className="app-container">
       <LeftSidebar 
-        directoryData={directoryData}
-        activeItemId={activeItemId}
-        onSelectItem={handleSelectItem}
-        onToggleFolder={handleToggleFolder}
+        pages={pages} // Pass pages instead of directoryData
+        activePageId={activePageId} // Pass activePageId
+        onSelectItem={handleSelectPage} // Pass renamed handler
+        // Remove folder-related props: onToggleFolder, onAddNewFolder
         onAddNewPage={handleAddNewPage}
-        onAddNewFolder={handleAddNewFolder}
-        onRenameItem={handleRenameItem}   // Pass rename handler
-        onDeleteItem={handleDeleteItem}   // Pass delete handler
+        onRenameItem={handleRenamePage}   // Pass renamed handler
+        onDeleteItem={handleDeletePage}   // Pass renamed handler
       />
       <div className="main-content">
         <MenuBar editor={editor} />
@@ -357,7 +308,10 @@ export const App = () => {
           {editor && <CommentViewComponent editor={editor} />}
         </div>
       </div>
-      <RightChatPanel />
+      <RightChatPanel 
+        isCollapsed={isChatCollapsed} 
+        onToggleCollapse={handleToggleChatCollapse} 
+      />
     </div>
   );
 };
