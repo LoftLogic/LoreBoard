@@ -92,12 +92,51 @@ const SelectionMenu = ({ editor }) => {
     }
   };
 
-  const handleTrackEntity = (entityType) => {
+  const handleTrackEntity = useCallback(async (entityType) => {
+    if (!editor) return;
+
     const { from, to } = editor.state.selection;
     const selectedText = editor.state.doc.textBetween(from, to);
-    console.log(`Track Entity Clicked: Type=${entityType}, Text='${selectedText}'`);
-    // Placeholder: In the future, this will trigger state update and potentially backend calls
-  };
+
+    if (!selectedText.trim()) {
+      console.log("No text selected for tracking.");
+      return;
+    }
+
+    const apiEntityType = entityType.toLowerCase();
+    const apiUrl = `http://localhost:8000/api/entities/${apiEntityType}`;
+
+    const requestBody = {
+      name: selectedText,
+      selected_text: selectedText,
+      position: from
+    };
+
+    console.log(`Tracking Entity: Type=${entityType}, Text='${selectedText}', Position=${from}`);
+    console.log(`Sending POST request to ${apiUrl} with body:`, requestBody);
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.detail || response.statusText}`);
+      }
+
+      const createdEntity = await response.json();
+      console.log('Successfully created entity:', createdEntity);
+
+    } catch (error) {
+      console.error('Error tracking entity:', error);
+    }
+
+  }, [editor]);
 
   return (
     <BubbleMenu className="bubble-menu" editor={editor} tippyOptions={{ duration: 100 }}>
