@@ -7,6 +7,7 @@ import Underline from "@tiptap/extension-underline";
 import { EditorProvider, useCurrentEditor, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import React, { useState } from "react";
+import { v4 as uuidv4 } from 'uuid';
 import { CommentMark } from "./CommentMark";
 import CommentViewComponent from "./CommentViewComponent";
 
@@ -79,9 +80,13 @@ const SelectionMenu = () => {
 
   const addComment = () => {
     if (commentText.trim()) {
+      const commentId = uuidv4();
       editor.chain().focus().setMark('comment', {
-        id: Date.now().toString(),
+        id: commentId,
         text: commentText,
+        author: 'Current User',
+        createdAt: new Date().toISOString(),
+        resolved: false,
       }).run();
       setCommentText('');
       setShowCommentInput(false);

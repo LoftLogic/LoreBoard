@@ -21,7 +21,8 @@
     "react": "latest",
     "react-dom": "latest",
     "react-scripts": "latest",
-    "sass": "1.69.5"
+    "sass": "1.69.5",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@babel/runtime": "7.13.8",

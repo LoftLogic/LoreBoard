@@ -37,6 +37,42 @@ export const CommentMark = Mark.create({
           };
         },
       },
+      author: {
+        default: 'Anonymous',
+        parseHTML: element => element.getAttribute('data-comment-author'),
+        renderHTML: attributes => {
+          if (!attributes.author) {
+            return {};
+          }
+          return {
+            'data-comment-author': attributes.author,
+          };
+        },
+      },
+      resolved: {
+        default: false,
+        parseHTML: element => element.hasAttribute('data-comment-resolved'),
+        renderHTML: attributes => {
+          if (!attributes.resolved) {
+            return {};
+          }
+          return {
+            'data-comment-resolved': '',
+          };
+        },
+      },
+      createdAt: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-comment-created-at'),
+        renderHTML: attributes => {
+          if (!attributes.createdAt) {
+            return {};
+          }
+          return {
+            'data-comment-created-at': attributes.createdAt,
+          };
+        },
+      },
     };
   },
 
