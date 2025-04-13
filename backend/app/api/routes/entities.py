@@ -125,6 +125,7 @@ def get_all_entities(
     entity_type: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
+    print("tryna get all entities")
     result = {}
     
     # Get entities based on type filter
