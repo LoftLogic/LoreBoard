@@ -1,9 +1,15 @@
 import React from 'react';
-import { BookOpen, Sparkles, Network, ArrowRight } from 'lucide-react';
+import { BookOpen, Sparkles, Network, ArrowRight, GitBranch, Feather } from 'lucide-react';
+
+const BoldPurple = (text: string) => {
+  return <span className="bg-gradient-to-r from-loreboard-600 to-loreboard-500 bg-clip-text text-transparent">
+        {text}
+      </span>
+};
 
 const Landing: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-loreboard-50 via-white to-loreboard-100">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-sm border-b border-loreboard-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,28 +35,37 @@ const Landing: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden bg-white pb-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Craft Your Universe with
-              <span className="block bg-gradient-to-r from-loreboard-600 to-loreboard-500 bg-clip-text text-transparent">
-                Intelligent Storytelling
-              </span>
-            </h2>
-            <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto">
-              Transform your creative vision into immersive narratives with LoreBoard's AI-powered world-building platform. 
-              Seamlessly manage characters, locations, and storylines while maintaining perfect continuity.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-loreboard-500 hover:bg-loreboard-600 text-white px-8 py-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-purple-glow font-semibold text-lg flex items-center justify-center gap-2">
-                Start Writing Now
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <button className="border-2 border-loreboard-500 text-loreboard-600 hover:bg-loreboard-50 px-8 py-4 rounded-lg transition-colors duration-200 font-semibold text-lg">
-                View Demo
-              </button>
+            {/* Large Hero Icon */}
+            <div className="mb-8 flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-loreboard-500 to-loreboard-600 rounded-3xl transform rotate-6 blur-xl opacity-30"></div>
+                <div className="relative bg-gradient-to-br from-loreboard-500 to-loreboard-600 p-8 rounded-3xl transform -rotate-3 shadow-2xl">
+                  <Feather className="w-24 h-24 text-white" strokeWidth={1.5} />
+                </div>
+              </div>
             </div>
+            
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+              Write {BoldPurple('Smarter')}, Write {BoldPurple('Harder')}, Write with {BoldPurple('LoreBoard')}
+              
+            </h2>
+            <p className="text-xl text-gray-700 mb-8 max-w-4xl mx-auto">
+              <br/>
+              Time to ditch Google Docs, Microsoft Word, and SudoWrite.
+             <br/>
+             <br/>
+
+              {BoldPurple('LoreBoard')} doesn't let AI hijack the writing process, but doesn't ignore AI either. {BoldPurple('LoreBoard')} utilizes 
+              AI models and intuitive design to help you foster the creative process by ensuring consistency, cohesion, and vibrance across your writing.
+
+              <br/>
+
+
+
+            </p>
           </div>
         </div>
         
@@ -60,7 +75,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white/50">
+      <section id="features" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
@@ -71,67 +86,134 @@ const Landing: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="max-w-6xl mx-auto space-y-16">
             {/* Feature 1 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 border border-loreboard-100 hover:shadow-purple-glow transition-shadow duration-300">
-              <div className="bg-gradient-to-br from-loreboard-100 to-loreboard-50 w-16 h-16 rounded-lg flex items-center justify-center mb-6">
-                <BookOpen className="w-8 h-8 text-loreboard-600" />
+            <div className="flex items-start gap-16 group p-8 rounded-2xl bg-gradient-to-r from-loreboard-50 to-transparent hover:from-loreboard-100/80 hover:to-loreboard-50/50 transition-all duration-300">
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-br from-loreboard-500 to-loreboard-600 rounded-3xl transform rotate-6 blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                <div className="relative bg-gradient-to-br from-loreboard-500 to-loreboard-600 p-10 rounded-3xl transform -rotate-6 shadow-xl group-hover:shadow-2xl group-hover:-rotate-3 transition-all duration-300">
+                  <BookOpen className="w-20 h-20 text-white" strokeWidth={1.5} />
+                </div>
               </div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">
-                Dynamic Entity Management
-              </h4>
-              <p className="text-gray-700">
-                Create and organize complex character profiles, intricate locations, and meaningful items. 
-                Our intelligent system maintains relationships and continuity across your entire narrative universe.
-              </p>
+              <div className="flex-1">
+                <h4 className="text-3xl font-bold text-gray-900 mb-4">
+                  Dynamic Entity Management
+                </h4>
+                <p className="text-lg text-gray-700 leading-relaxed">
+
+                  <span className="font-bold"> "Wait, what does he look like again?"</span> <br/><br/>
+
+                  Instead of 'ctrl + f'ing to success, take advantage of {" "}{BoldPurple('LoreBoard')}{"'s "} dynamic entity management. 
+                  <br/>
+                  Mark characters, locations, and items as entities with a single click, and Loreboard will keep track of them for you.
+                  It won't just track text by the entity, but also the attributes the text is about.  <br/> <br/>
+                  A side characters appearance? Done. <br/>
+                  The wise mentor's dialogue? Done. <br/>
+                  Every time the protaganist interacts with the antagonist? Done. <br/>
+                  The magical forest's physical description? Done. <br/>
+                  The special abilities and drawbacks of that magic item? Done. <br/> <br/>
+
+
+                  
+                  Create and organize profiles for characters, locations, and items. 
+                  Our intelligent system maintains relationships and continuity across your entire narrative universe.
+                  If you need to find where you described a character's face, or where you first introduced a magic item,{" "}
+                   {BoldPurple('LoreBoard')} has you covered. 
+                </p>
+              </div>
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 border border-loreboard-100 hover:shadow-purple-glow transition-shadow duration-300">
-              <div className="bg-gradient-to-br from-loreboard-100 to-loreboard-50 w-16 h-16 rounded-lg flex items-center justify-center mb-6">
-                <Sparkles className="w-8 h-8 text-loreboard-600" />
+            <div className="flex items-start gap-16 group p-8 rounded-2xl bg-gradient-to-r from-loreboard-50 to-transparent hover:from-loreboard-100/80 hover:to-loreboard-50/50 transition-all duration-300">
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-br from-loreboard-500 to-loreboard-600 rounded-3xl transform rotate-6 blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                <div className="relative bg-gradient-to-br from-loreboard-500 to-loreboard-600 p-10 rounded-3xl transform -rotate-6 shadow-xl group-hover:shadow-2xl group-hover:-rotate-3 transition-all duration-300">
+                  <Sparkles className="w-20 h-20 text-white" strokeWidth={1.5} />
+                </div>
               </div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">
-                AI-Powered Auto-Fill
-              </h4>
-              <p className="text-gray-700">
-                Harness the power of advanced language models to generate contextually aware content. 
-                Fill narrative gaps, develop dialogue, and expand descriptions while maintaining your unique voice.
-              </p>
+              <div className="flex-1">
+                <h4 className="text-3xl font-bold text-gray-900 mb-4">
+                  AI-Powered Auto-Fill and Reword
+                </h4>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  <span className="font-bold"> Don't stop writing because you can't think of a word thats ____ enough, keep going and let us fill in the blanks.</span> <br/><br/>
+
+                  Need a word thats more ____? <br/>
+                  {BoldPurple('LoreBoard')} uses Large Language Models and Vector Embeddings to currate the perfect word for you- if you want us to.
+                  Simply throw down some underscores and let the creative juices flow while we handle the speed bumps.
+                  As you write more, we'll have a better idea of what you're looking for and we'll be able to make better suggestions.
+                  Or, right click a word and just write adjectives- we'll use vectore embeddings to find the best words that accomodates what your looking for.
+                </p>
+              </div>
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 border border-loreboard-100 hover:shadow-purple-glow transition-shadow duration-300">
-              <div className="bg-gradient-to-br from-loreboard-100 to-loreboard-50 w-16 h-16 rounded-lg flex items-center justify-center mb-6">
-                <Network className="w-8 h-8 text-loreboard-600" />
+            <div className="flex items-start gap-16 group p-8 rounded-2xl bg-gradient-to-r from-loreboard-50 to-transparent hover:from-loreboard-100/80 hover:to-loreboard-50/50 transition-all duration-300">
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-br from-loreboard-500 to-loreboard-600 rounded-3xl transform rotate-6 blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                <div className="relative bg-gradient-to-br from-loreboard-500 to-loreboard-600 p-10 rounded-3xl transform -rotate-6 shadow-xl group-hover:shadow-2xl group-hover:-rotate-3 transition-all duration-300">
+                  <Network className="w-20 h-20 text-white" strokeWidth={1.5} />
+                </div>
               </div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">
-                Relationship Mapping
-              </h4>
-              <p className="text-gray-700">
-                Visualize and manage complex relationships between entities in your world. 
-                Track connections, conflicts, and dependencies to ensure narrative coherence and depth.
-              </p>
+              <div className="flex-1">
+                <h4 className="text-3xl font-bold text-gray-900 mb-4">
+                  Note Web
+                </h4>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  <span className="font-bold">Every story deserves its own wiki.</span> <br/><br/>
+
+                  Instead of waiting for your story to have a community that makes one for you, create your own with 
+                  {" "}{BoldPurple('LoreBoard')}{"'s "} Note Web.
+
+                  
+                  Visualize and manage complex relationships between entities in your world. 
+                  Track connections, conflicts, worldbuilding, and lore to ensure narrative coherence and immersive depth.
+                  Characters, factions, events, maps, and more.
+                  Make sure you and your readers have all the information they need to understand your world.
+                  <br/><br/>
+                  Build the pages yourself or let us do it for you. Better yet, do both- you can do the fun stuff and let fill the page for that
+                  character that appeared in twice in the last ten chapters.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 4 - Version Control */}
+            <div className="flex items-start gap-16 group p-8 rounded-2xl bg-gradient-to-r from-loreboard-50 to-transparent hover:from-loreboard-100/80 hover:to-loreboard-50/50 transition-all duration-300">
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-br from-loreboard-500 to-loreboard-600 rounded-3xl transform rotate-6 blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                <div className="relative bg-gradient-to-br from-loreboard-500 to-loreboard-600 p-10 rounded-3xl transform -rotate-6 shadow-xl group-hover:shadow-2xl group-hover:-rotate-3 transition-all duration-300">
+                  <GitBranch className="w-20 h-20 text-white" strokeWidth={1.5} />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h4 className="text-3xl font-bold text-gray-900 mb-4">
+                  Intelligent Version Control
+                </h4>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  <span className="font-bold">Seperate the slop from your polished work, and merge them with precision.</span> <br/><br/>
+                  
+                  Track every revision and explore alternate storylines with confidence. 
+                  Feel free to expirement without needing to hit the reset button.
+                  Branch your narrative, compare versions, and seamlessly merge changes while preserving your creative history with 
+                  {" "}{BoldPurple('LoreBoard')}{"'s "} intelligent version control.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 bg-gradient-to-b from-white/50 to-loreboard-50">
+      <section id="about" className="py-20 bg-gradient-to-b from-white to-loreboard-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
               Built for Storytellers, by Storytellers
             </h3>
             <p className="text-lg text-gray-700 mb-8">
-              LoreBoard revolutionizes the creative writing process by combining intuitive design with cutting-edge AI technology. 
+              { BoldPurple('LoreBoard')} {' '} revolutionizes the creative writing process by combining intuitive design with cutting-edge AI technology. 
               Whether you're crafting an epic fantasy saga, developing a science fiction universe, or writing contemporary fiction, 
               our platform adapts to your unique creative process.
-            </p>
-            <p className="text-lg text-gray-700 mb-12">
-              Join thousands of writers who have discovered the perfect balance between creative freedom and organizational structure. 
-              Let LoreBoard handle the complexity while you focus on what matters most: telling extraordinary stories.
             </p>
             <button className="bg-loreboard-500 hover:bg-loreboard-600 text-white px-10 py-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-purple-glow font-semibold text-lg flex items-center justify-center gap-2 mx-auto">
               Begin Your Journey
