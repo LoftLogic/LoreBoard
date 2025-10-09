@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { BookOpen, Sparkles, Network, ArrowRight, GitBranch, Feather } from 'lucide-react';
 
 const BoldPurple = (text: string) => {
@@ -26,9 +27,9 @@ const Landing: React.FC = () => {
               <a href="#about" className="text-gray-700 hover:text-loreboard-600 px-3 py-2 rounded-md hover:bg-loreboard-50 transition-all duration-200">
                 About
               </a>
-              <button className="bg-loreboard-500 hover:bg-loreboard-600 text-white px-6 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-purple-glow font-medium">
+              <Link to="/editor" className="inline-block bg-loreboard-500 hover:bg-loreboard-600 text-white px-6 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-purple-glow font-medium">
                 Start Now
-              </button>
+              </Link>
             </div>
           </div>
         </div>
