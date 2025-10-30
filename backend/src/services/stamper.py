@@ -16,5 +16,3 @@ class Stamper(ABC):
     @abstract_method
     def get_llm_chain(self) -> LLMChain:
         pass
-    
-    

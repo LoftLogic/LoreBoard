@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from nanoid import generate
+
 """
 Text Data:
 A text has:
@@ -16,7 +18,7 @@ Ideation:
     Document
     ├── ParagraphNode
     │    ├── TextNode("Harry looked at Ron and said, ")
-    │    ├── DialogueNode(character="Ron")
+    │    ├── InteractionNode(characters="Ron", "Harry")
     │    │     └── TextNode("Blimey, mate!")
     │    └── TextNode(" Ron laughed.", attributes={"italic"})
     └── ParagraphNode
@@ -35,65 +37,197 @@ Comment (maybe?)
             
 
 NOTE: The implemenation below is mainly expiremental
-
 """
 
 ATTRIBUTES = {"bold", "italic", "underline"}
 
-TEXTYPES = set()
+TEXTTYPES = {"Title", "Chapter", "Subheading", "Basic"}
 
 class Node(ABC):
     """
     A node from our document tree.
     """
-    # This may be scrapped
-    @abstractmethod 
-    def is_ai_feature(self) -> bool:
-        pass
-    
-    @abstractmethod
-    def is_ai_tagged(self) -> bool:
-        pass
-    
     @abstractmethod
     def to_dict(self) -> dict:
+        """
+        Transforms this node into a dictionary
+        DOES NOT RECURSE
+        """
         pass
     
     @abstractmethod
-    def get_texttype(self) -> str:
+    def to_dict_recurse(self):
+        """
+        Transforms this node into a dictionary
+        CALLS THIS ON ALL NESTED NODES
+        """
         pass
+    
     
     @abstractmethod
     def get_plaintext(self) -> str:
         pass
     
-    @abstractmethod
-    def get_attributes(self) -> dict:
-        pass
     
     @abstractmethod
-    def has_ai_tags(self) -> bool:
-        return self.ai_tags() != {}
-    
-    @abstractmethod
-    def add_child(self, child_node: 'Node') -> None:
+    def add_child(self, child: 'Node') -> None:
         pass
+    
+    def add_children(self, children: list['Node']) -> None:
+        for child in children:
+            self.add_child(child)
+    
     
     @abstractmethod
     def get_children(self) -> list['Node']:
         pass
     
     @abstractmethod
-    def remove_child(self, child_node: 'Node') -> None:
+    def remove_child(self, child: 'Node') -> None:
         pass
     
+    @abstractmethod
+    def get_rank(self) -> int:
+        pass
     
+    def has_child(self, child: 'Node') -> bool:
+        return child in self.get_children
+    
+class DocumentNode(Node):
+    """
+    A document consisting of nodes in a tree structure.
+    The root node in a document.
+    
+    Invariants:
+
+    """
+    rank = 1
+    
+    def __init__(self, title: str,  font_size = 12):
+        self.title = title
+        self.font_size = font_size
+        self.children: list[ChapterNode] = []
+
+    def to_dict(self) -> dict:
+        return {
+            "title": self.title,
+            "font_size" : self.font_size,
+            "children": self.children
+        }
+
+
+    def to_dict_recurse(self):
+        return {
+            "title": self.title,
+            "font_size" : self.font_size,
+            "children": list(map(lambda node: node.to_dict_recurse(), self.children))
+        }
+
+    def get_plaintext(self):
+        raise NotImplementedError
+
+    def add_child(self, child):
+        assert self.get_rank() <= child.get_rank()
+        
+        self.children.append(child)
+
+    def get_children(self):
+        return self.children
+
+    def remove_child(self, child):
+        self.children.pop(child)
+
+    def get_rank(self) -> int:
+        return DocumentNode.rank
+        
+class ChapterNode(Node):
+    """
+    A chapter in the document.
+    """
+    rank = 2
+    
+    def __init__(self, title: str, subheading: str = ""):
+        self.title = title
+        self.subheading = subheading
+        self.children: list['ParagraphNode'] = []
+
+    def to_dict(self):
+        return {
+            "title": self.title,
+            "subheading": self.subheading,
+            "children": self.children
+        }
+        
+    def to_dict_recurse(self):
+        raise NotImplementedError
+
+    def get_plaintext(self):
+        raise NotImplementedError
+
+    def add_child(self, child):
+        self.get_rank() <= child.get_rank()
+        raise NotImplementedError
+
+    def get_children(self):
+        raise NotImplementedError
+
+    def remove_child(self, child):
+        raise NotImplementedError
+
+    def get_rank(self):
+        return self.rank
+    
+    
+
+class ParagraphNode(Node):
+    """
+    A node representing the beginning of a paragraph
+    """
+    rank = 3
+
+class StampNode(Node):
+    """
+    A node representing an AI stamp.
+    """
+    rank = 4
+    
+    def is_ai_feature(self):
+        raise NotImplementedError
+
+    def is_ai_tagged(self):
+        raise NotImplementedError
+
+    def to_dict(self):
+        raise NotImplementedError
+
+    def get_texttype(self):
+        raise NotImplementedError
+
+    def get_plaintext(self):
+        raise NotImplementedError
+
+    def get_attributes(self):
+        raise NotImplementedError
+
+    def has_ai_tags(self):
+        raise NotImplementedError
+
+    def add_child(self, child):
+        self.get_rank() <= child.get_rank()
+        raise NotImplementedError
+
+    def get_children(self):
+        raise NotImplementedError
+
+    def remove_child(self, child):
+        raise NotImplementedError
 
 class TextNode(Node):
     """
     A text node in the document tree.
     The most basic node
     """
+    rank = 5
     
     def __init__(self, plaintext: str, texttype: str, attributes: set = None, ai_tags: dict = None):
         assert all(attr in ATTRIBUTES for attr in (attributes or set())), "Invalid attributes"
@@ -134,61 +268,12 @@ class TextNode(Node):
     def has_ai_tags(self):
         return self.ai_tags != {}
 
-    def add_child(self, child_node: Node):
-        self.children.append(child_node)
+    def add_child(self, child: Node):
+        self.get_rank() <= child.get_rank()
+        self.children.append(child)
 
     def get_children(self):
         raise NotImplementedError
 
-    def remove_child(self, child_node):
+    def remove_child(self, child):
         raise NotImplementedError
-
-    
-class StampNode(Node):
-    """
-    A node representing an AI stamp.
-    """
-
-    def is_ai_feature(self):
-        raise NotImplementedError
-
-    def is_ai_tagged(self):
-        raise NotImplementedError
-
-    def to_dict(self):
-        raise NotImplementedError
-
-    def get_texttype(self):
-        raise NotImplementedError
-
-    def get_plaintext(self):
-        raise NotImplementedError
-
-    def get_attributes(self):
-        raise NotImplementedError
-
-    def has_ai_tags(self):
-        raise NotImplementedError
-
-    def add_child(self, child_node):
-        raise NotImplementedError
-
-    def get_children(self):
-        raise NotImplementedError
-
-    def remove_child(self, child_node):
-        raise NotImplementedError
-
-
-
-
-    
-class DocumentNode(Node):
-    """
-    A document consisting of nodes in a tree structure.
-    
-    """
-    def __init__(self, root: Node):
-        self.root = root
-        
-    

@@ -9,4 +9,5 @@ class Story:
         self.title = title
         content = content
         
-    
+    def get_content(self) -> DocumentNode:
+        return self.content
