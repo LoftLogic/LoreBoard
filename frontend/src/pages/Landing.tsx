@@ -149,7 +149,7 @@ const Landing: React.FC = () => {
             </div>
 
             {/* Feature 3 */}
-            <div className="flex items-start gap-16 group p-8 rounded-2xl bg-gradient-to-r from-loreboard-50 to-transparent hover:from-loreboard-100/80 hover:to-loreboard-50/50 transition-all duration-300">
+            {/* <div className="flex items-start gap-16 group p-8 rounded-2xl bg-gradient-to-r from-loreboard-50 to-transparent hover:from-loreboard-100/80 hover:to-loreboard-50/50 transition-all duration-300">
               <div className="relative flex-shrink-0">
                 <div className="absolute inset-0 bg-gradient-to-br from-loreboard-500 to-loreboard-600 rounded-3xl transform rotate-6 blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
                 <div className="relative bg-gradient-to-br from-loreboard-500 to-loreboard-600 p-10 rounded-3xl transform -rotate-6 shadow-xl group-hover:shadow-2xl group-hover:-rotate-3 transition-all duration-300">
@@ -176,10 +176,10 @@ const Landing: React.FC = () => {
                   character that appeared in twice in the last ten chapters.
                 </p>
               </div>
-            </div>
+            </div> */}
 
             {/* Feature 4 - Version Control */}
-            <div className="flex items-start gap-16 group p-8 rounded-2xl bg-gradient-to-r from-loreboard-50 to-transparent hover:from-loreboard-100/80 hover:to-loreboard-50/50 transition-all duration-300">
+            {/* <div className="flex items-start gap-16 group p-8 rounded-2xl bg-gradient-to-r from-loreboard-50 to-transparent hover:from-loreboard-100/80 hover:to-loreboard-50/50 transition-all duration-300">
               <div className="relative flex-shrink-0">
                 <div className="absolute inset-0 bg-gradient-to-br from-loreboard-500 to-loreboard-600 rounded-3xl transform rotate-6 blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
                 <div className="relative bg-gradient-to-br from-loreboard-500 to-loreboard-600 p-10 rounded-3xl transform -rotate-6 shadow-xl group-hover:shadow-2xl group-hover:-rotate-3 transition-all duration-300">
@@ -199,9 +199,11 @@ const Landing: React.FC = () => {
                   {" "}{BoldPurple('LoreBoard')}{"'s "} intelligent version control.
                 </p>
               </div>
-            </div>
+            </div> */}
+
           </div>
         </div>
+
       </section>
 
       {/* About Section */}
