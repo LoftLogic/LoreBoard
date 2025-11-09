@@ -6,7 +6,7 @@ from nanoid import generate
 Text Data:
 A text has:
     string content
-    text type (e.g., paragraph, heading, list item)
+    text type (e.g., basic, chapter, etc)
     attributes (e.g., bold, italic, underline)
     ai tags (e.g., summarized, key points, questions)
     
@@ -15,26 +15,18 @@ Ideation:
     We have a tree structure of nodes.
     
     It will look something like this:
-    Document
+    ChapterNode
     ├── ParagraphNode
     │    ├── TextNode("Harry looked at Ron and said, ")
-    │    ├── InteractionNode(characters="Ron", "Harry")
+    │    ├── InteractionNode(characters="Ron", "Harry") # This is an AI Stamp
     │    │     └── TextNode("Blimey, mate!")
     │    └── TextNode(" Ron laughed.", attributes={"italic"})
     └── ParagraphNode
         └── TextNode("It was a normal day at Hogwarts.")
         
-Heres my idea for Node inheritance:
-A Node is a text node or a feature node
 
-A text node is either:
-AIStamp
-Plaintext
 
-A feature node is either:
-AIautofil
-Comment (maybe?)
-            
+
 
 NOTE: The implemenation below is mainly expiremental
 """

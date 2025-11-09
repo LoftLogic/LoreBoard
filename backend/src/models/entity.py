@@ -17,3 +17,4 @@ class Entity:
         
     def remove_alias(self, alias):
         self.aliases.remove(alias)
+        

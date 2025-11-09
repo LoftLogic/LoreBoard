@@ -16,18 +16,6 @@ class UserEvent(ABC):
         pass
     
     
-"""
-For changes:
-- Input/Event Layer
-- Change representation Layer
-- Document Mutation Layer
-- Event dispatch layer
-- Versioning Layer
-"""
-class ChangeType(Enum):
-    ADDITION = "ADDITION"
-    DELETION = "DELETION"
-    MODIFICATION = "MODIFICATION"
 
 class TextChangeEvent(UserEvent):
     """
@@ -37,7 +25,7 @@ class TextChangeEvent(UserEvent):
     
 class NewEntityEvent(UserEvent):
     """
-    Event triggered when the user registers a new entity
+    Event triggered when the user registers a new entity,potnhun
     """
     def __init__(self, entity_name):
         """
