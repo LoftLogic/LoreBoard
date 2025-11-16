@@ -13,7 +13,7 @@ from enum import Enum
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from src.models.nodes import Node
+from backend.src.models.scrap.nodes import Node
 
 class ChangeType(Enum):
     ADDITION = ("Text being added", {"op": "insert"})

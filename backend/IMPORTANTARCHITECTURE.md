@@ -2,6 +2,7 @@
 
 ### The following process will occur:
 1. The user sends a story update with new text
+
 2. The frontend sends this update to the backend as a lexical text node tree.
 {
   "content": {

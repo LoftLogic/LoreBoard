@@ -1,4 +1,4 @@
-from src.models.nodes import Node
+from backend.src.models.scrap.nodes import Node
 
 class BasicParser:
     """

@@ -1,4 +1,4 @@
-from src.models.nodes import DocumentNode, Node
+from backend.src.models.scrap.nodes import DocumentNode, Node
 
 class Story:
     """

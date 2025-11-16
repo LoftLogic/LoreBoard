@@ -1,5 +1,5 @@
 import ABC, abstract_method
-from src.models.nodes import Node, DocumentNode, TextNode, StampNode
+from backend.src.models.scrap.nodes import Node, DocumentNode, TextNode, StampNode
 from langchain import LLMChain
 
 

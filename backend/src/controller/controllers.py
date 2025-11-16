@@ -5,7 +5,7 @@ from src.services.stamper import Stamper
 from src.types.stack import Stack
 from src.models.story import Story
 from src.events.events import UserEvent, TextChangeEvent, ChangeType
-from src.models.nodes import Node, DocumentNode
+from backend.src.models.scrap.nodes import Node, DocumentNode
 
 import time
 
