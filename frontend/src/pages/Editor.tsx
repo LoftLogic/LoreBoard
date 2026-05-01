@@ -1,419 +1,193 @@
-import React, { useState } from 'react';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import {
-  $getSelection,
-  $isRangeSelection,
-  FORMAT_TEXT_COMMAND,
-  $createParagraphNode,
-  $createTextNode,
-  ElementNode,
-  TextNode,
-  EditorState,
-  LexicalEditor,
-} from 'lexical';
-import { 
-  $setBlocksType 
-} from '@lexical/selection';
-import { 
-  HeadingNode,
-  $createHeadingNode,
-  HeadingTagType 
-} from '@lexical/rich-text';
-import { Bold, Italic, Underline, Search } from 'lucide-react';
+import { useState, useCallback } from 'react'
+import { useParams } from 'react-router-dom'
+import type { EditorState } from 'lexical'
+import { Loader2, CheckCircle, AlertCircle, Zap } from 'lucide-react'
+import LexicalEditor from '@/components/editor/LexicalEditor'
+import { useJob } from '@/hooks/useJob'
+import { storiesApi } from '@/api/stories'
+import { chaptersApi } from '@/api/chapters'
+import { jobsApi } from '@/api/jobs'
 
-// Custom heading node for our subtitle style
-class SubtitleNode extends HeadingNode {
-  static getType() {
-    return 'subtitle';
-  }
+type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
-  static clone(node: SubtitleNode) {
-    return new SubtitleNode(node.__tag, node.__key);
-  }
-
-  createDOM() {
-    const element = document.createElement(this.__tag);
-    element.className = 'text-sm text-gray-500 font-mono';
-    return element;
-  }
-
-  static importJSON(serializedNode: any) {
-    const node = $createSubtitleNode();
-    return node;
-  }
-
-  exportJSON() {
-    return {
-      ...super.exportJSON(),
-      type: 'subtitle',
-      version: 1,
-    };
-  }
+/** IDs created/opened in this session. Preserved across re-renders but not navigation. */
+interface Session {
+  storyId: string
+  chapterId: string
 }
 
-function $createSubtitleNode(): SubtitleNode {
-  return new SubtitleNode('h4');
-}
+export default function Editor() {
+  const { storyId: urlStoryId } = useParams<{ storyId: string }>()
 
-// Toolbar component with text formatting controls
-function ToolbarPlugin() {
-  const [editor] = useLexicalComposerContext();
-  const [textType, setTextType] = useState<string>('basic');
-  const [isBold, setIsBold] = useState(false);
-  const [isItalic, setIsItalic] = useState(false);
-  const [isUnderline, setIsUnderline] = useState(false);
+  const [title, setTitle] = useState('Untitled Story')
+  const [editorState, setEditorState] = useState<EditorState | null>(null)
+  const [session, setSession] = useState<Session | null>(
+    urlStoryId ? { storyId: urlStoryId, chapterId: '' } : null,
+  )
+  const [saveState, setSaveState] = useState<SaveState>('idle')
+  const [analyzeJobId, setAnalyzeJobId] = useState<string | null>(null)
 
-  // Update formatting button states based on selection
-  const updateToolbar = () => {
-    const selection = $getSelection();
-    if ($isRangeSelection(selection)) {
-      setIsBold(selection.hasFormat('bold'));
-      setIsItalic(selection.hasFormat('italic'));
-      setIsUnderline(selection.hasFormat('underline'));
-    }
-  };
+  const { job: analyzeJob } = useJob(analyzeJobId)
 
-  // Register selection change listener
-  React.useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
-        updateToolbar();
-      });
-    });
-  }, [editor]);
+  const handleChange = useCallback((state: EditorState) => {
+    setEditorState(state)
+  }, [])
 
-  // Handle text type changes
-  const handleTextTypeChange = (type: string) => {
-    setTextType(type);
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        switch (type) {
-          case 'title':
-            $setBlocksType(selection, () => $createHeadingNode('h1'));
-            break;
-          case 'chapter':
-            $setBlocksType(selection, () => $createHeadingNode('h2'));
-            break;
-          case 'subtitle':
-            $setBlocksType(selection, () => $createSubtitleNode());
-            break;
-          case 'basic':
-            $setBlocksType(selection, () => $createParagraphNode());
-            break;
-        }
-      }
-    });
-  };
-
-  // Handle formatting commands
-  const formatText = (format: 'bold' | 'italic' | 'underline') => {
-    editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
-  };
-
-  return (
-    <div className="border-b border-gray-200 bg-white px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-      {/* Text type dropdown */}
-      <select
-        value={textType}
-        onChange={(e) => handleTextTypeChange(e.target.value)}
-        className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-loreboard-500 focus:border-transparent"
-      >
-        <option value="basic">Basic</option>
-        <option value="title">Title</option>
-        <option value="chapter">Chapter</option>
-        <option value="subtitle">Subtitle</option>
-      </select>
-
-      {/* Divider */}
-      <div className="h-6 w-px bg-gray-300" />
-
-      {/* Formatting buttons */}
-      <button
-        onClick={() => formatText('bold')}
-        className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-          isBold ? 'bg-loreboard-100 text-loreboard-700' : 'text-gray-700'
-        }`}
-        title="Bold"
-      >
-        <Bold size={18} />
-      </button>
-      <button
-        onClick={() => formatText('italic')}
-        className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-          isItalic ? 'bg-loreboard-100 text-loreboard-700' : 'text-gray-700'
-        }`}
-        title="Italic"
-      >
-        <Italic size={18} />
-      </button>
-      <button
-        onClick={() => formatText('underline')}
-        className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-          isUnderline ? 'bg-loreboard-100 text-loreboard-700' : 'text-gray-700'
-        }`}
-        title="Underline"
-      >
-        <Underline size={18} />
-      </button>
-
-      {/* Spacer to push magnifying glass to the right */}
-      <div className="flex-grow" />
-
-      {/* Search/Magnifying glass button */}
-      <button
-        className="p-2 rounded hover:bg-loreboard-50 text-loreboard-600 hover:text-loreboard-700 transition-colors"
-        title="Search"
-      >
-        <Search size={20} />
-      </button>
-    </div>
-  );
-}
-
-// Main editor component
-export default function StoryEditor() {
-  const [editorContent, setEditorContent] = useState<string>('');
-  const [isSending, setIsSending] = useState(false);
-  const [sendStatus, setSendStatus] = useState<'idle' | 'success' | 'error'>('idle');
-
-  // Initial editor configuration
-  const initialConfig = {
-    namespace: 'StoryEditor',
-    theme: {
-      paragraph: 'text-base font-mono mb-4',
-      text: {
-        bold: 'font-bold',
-        italic: 'italic',
-        underline: 'underline',
-      },
-      heading: {
-        h1: 'text-4xl font-bold font-mono mb-6',
-        h2: 'text-2xl font-semibold font-mono mb-4',
-      },
-    },
-    onError: (error: Error) => {
-      console.error(error);
-    },
-    nodes: [HeadingNode, SubtitleNode],
-  };
-
-  // Handle editor state changes
-  const onChange = (editorState: EditorState, editor: LexicalEditor) => {
-    editorState.read(() => {
-      const json = editorState.toJSON();
-      setEditorContent(JSON.stringify(json));
-    });
-  };
-
-  // Handle send button click
-  const handleSend = async () => {
-    setIsSending(true);
-    setSendStatus('idle');
+  const handleSaveAndAnalyze = async () => {
+    if (!editorState) return
+    setSaveState('saving')
 
     try {
-      // Parse the editor content
-      const editorStateJSON = JSON.parse(editorContent);
-      
-      // You can now use the imported sendStory function instead:
-      // import { sendStory } from './storyApi';
-      // const result = await sendStory(editorStateJSON, { title: 'My Story' });
-      
-      // Direct fetch implementation (using storyApi.ts structure)
-      const response = await fetch('http://localhost:8000/api/story/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: editorStateJSON,
-          timestamp: new Date().toISOString(),
-          metadata: {
-            title: 'Untitled Story',
-            author: 'Anonymous',
-          }
-        }),
-      });
+      const content = JSON.stringify(editorState.toJSON())
+      let currentSession = session
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+      // First save: create story + chapter
+      if (!currentSession) {
+        const story = await storiesApi.create(title)
+        const chapter = await chaptersApi.create({
+          story_id: story.id,
+          order: 1,
+          title: 'Chapter 1',
+          content,
+        })
+        currentSession = { storyId: story.id, chapterId: chapter.id }
+        setSession(currentSession)
+      } else {
+        // Update existing chapter content (marks it STALE automatically)
+        if (currentSession.chapterId) {
+          await chaptersApi.updateContent(currentSession.chapterId, content)
+        }
       }
 
-      const result = await response.json();
-      console.log('Story sent successfully:', result);
-      setSendStatus('success');
-      
-      // Reset status after 3 seconds
-      setTimeout(() => setSendStatus('idle'), 3000);
-    } catch (error) {
-      console.error('Error sending story:', error);
-      setSendStatus('error');
-      
-      // Reset status after 3 seconds
-      setTimeout(() => setSendStatus('idle'), 3000);
-    } finally {
-      setIsSending(false);
+      setSaveState('saved')
+
+      // Kick off analysis
+      if (currentSession.chapterId) {
+        const { job_id } = await jobsApi.analyzeChapter(currentSession.chapterId)
+        setAnalyzeJobId(job_id)
+      }
+
+      setTimeout(() => setSaveState('idle'), 3000)
+    } catch (err) {
+      console.error(err)
+      setSaveState('error')
+      setTimeout(() => setSaveState('idle'), 4000)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-loreboard-50 to-white">
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        <div className="bg-white rounded-lg shadow-purple-glow overflow-hidden">
-          <LexicalComposer initialConfig={initialConfig}>
-            <ToolbarPlugin />
-            <div className="relative">
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable className="min-h-[500px] px-8 py-6 outline-none font-mono" />
-                }
-                placeholder={
-                  <div className="absolute top-6 left-8 text-gray-400 font-mono pointer-events-none">
-                    Begin your story...
-                  </div>
-                }
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <OnChangePlugin onChange={onChange} />
-              <HistoryPlugin />
-            </div>
-          </LexicalComposer>
+      <div className="max-w-4xl mx-auto py-8 px-4 space-y-4">
 
-          {/* Send button */}
-          <div className="border-t border-gray-200 px-8 py-4 flex justify-end">
-            <button
-              onClick={handleSend}
-              disabled={isSending || !editorContent}
-              className={`px-6 py-2.5 rounded-lg font-medium transition-all ${
-                isSending || !editorContent
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : sendStatus === 'success'
-                  ? 'bg-green-600 text-white'
-                  : sendStatus === 'error'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-loreboard-600 text-white hover:bg-loreboard-700 shadow-lg hover:shadow-purple-glow'
-              }`}
-            >
-              {isSending ? 'Sending...' : sendStatus === 'success' ? 'Sent!' : sendStatus === 'error' ? 'Error' : 'Send'}
-            </button>
+        {/* Title bar */}
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Story title…"
+          className="w-full text-2xl font-serif font-bold text-loreboard-900 bg-transparent border-none outline-none placeholder-loreboard-300"
+        />
+
+        {/* Editor card */}
+        <div className="bg-white rounded-xl shadow-purple-glow overflow-hidden">
+          <LexicalEditor onChange={handleChange} />
+
+          {/* Footer bar */}
+          <div className="border-t border-gray-100 px-8 py-3 flex items-center justify-between">
+            <JobStatusBadge jobId={analyzeJobId} />
+            <SaveButton
+              state={saveState}
+              disabled={!editorState}
+              onClick={handleSaveAndAnalyze}
+            />
           </div>
         </div>
 
-        {/* API Documentation */}
-        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-loreboard-700 mb-4">API Documentation</h2>
-          
-          <div className="space-y-4 font-mono text-sm">
-            <div>
-              <h3 className="font-bold text-lg mb-2">Endpoint</h3>
-              <code className="bg-gray-100 px-3 py-2 rounded block">POST /api/story</code>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-lg mb-2">Request Headers</h3>
-              <pre className="bg-gray-100 px-3 py-2 rounded overflow-x-auto">
-{`Content-Type: application/json`}
-              </pre>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-lg mb-2">Request Body</h3>
-              <pre className="bg-gray-100 px-3 py-2 rounded overflow-x-auto">
-{`{
-  "content": {
-    "root": {
-      "children": [...],
-      "direction": "ltr",
-      "format": "",
-      "indent": 0,
-      "type": "root",
-      "version": 1
-    }
-  },
-  "timestamp": "2025-11-06T12:34:56.789Z"
-}`}
-              </pre>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-lg mb-2">Content Structure</h3>
-              <p className="text-gray-700 mb-2">
-                The <code className="bg-gray-100 px-1 py-0.5 rounded">content</code> field contains 
-                a Lexical EditorState JSON object with the following structure:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-gray-700 ml-4">
-                <li><strong>root</strong>: The root node containing all content</li>
-                <li><strong>children</strong>: Array of paragraph/heading nodes</li>
-                <li>Each node has a <strong>type</strong> (paragraph, heading, subtitle)</li>
-                <li>Text nodes have <strong>format</strong> flags (bold=1, italic=2, underline=8)</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-lg mb-2">Expected Response</h3>
-              <pre className="bg-gray-100 px-3 py-2 rounded overflow-x-auto">
-{`{
-  "success": true,
-  "storyId": "unique-story-id",
-  "message": "Story saved successfully"
-}`}
-              </pre>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-lg mb-2">Error Response</h3>
-              <pre className="bg-gray-100 px-3 py-2 rounded overflow-x-auto">
-{`{
-  "success": false,
-  "error": "Error message",
-  "code": "ERROR_CODE"
-}`}
-              </pre>
-            </div>
-
-            <div className="border-t pt-4">
-              <h3 className="font-bold text-lg mb-2">Backend Implementation Example</h3>
-              <pre className="bg-gray-900 text-green-400 px-3 py-2 rounded overflow-x-auto">
-{`// Express.js example
-app.post('/api/story', async (req, res) => {
-  try {
-    const { content, timestamp } = req.body;
-    
-    // Validate content
-    if (!content || !content.root) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid content structure'
-      });
-    }
-    
-    // Save to database
-    const storyId = await saveStory(content, timestamp);
-    
-    res.json({
-      success: true,
-      storyId,
-      message: 'Story saved successfully'
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});`}
-              </pre>
-            </div>
-          </div>
-        </div>
+        {/* Session info (dev aid) */}
+        {session && (
+          <p className="text-xs text-gray-400 font-mono">
+            story: {session.storyId} · chapter: {session.chapterId || 'pending'}
+          </p>
+        )}
       </div>
     </div>
-  );
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+function SaveButton({
+  state,
+  disabled,
+  onClick,
+}: {
+  state: SaveState
+  disabled: boolean
+  onClick: () => void
+}) {
+  const map: Record<SaveState, { label: string; cls: string }> = {
+    idle: {
+      label: 'Save & Analyze',
+      cls: 'bg-loreboard-600 hover:bg-loreboard-700 text-white shadow-lg hover:shadow-purple-glow',
+    },
+    saving: { label: 'Saving…', cls: 'bg-loreboard-400 text-white cursor-wait' },
+    saved: { label: 'Saved', cls: 'bg-green-600 text-white' },
+    error: { label: 'Error', cls: 'bg-red-600 text-white' },
+  }
+  const { label, cls } = map[state]
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled || state === 'saving'}
+      className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium text-sm transition-all ${cls} disabled:opacity-50 disabled:cursor-not-allowed`}
+    >
+      {state === 'saving' ? (
+        <Loader2 size={15} className="animate-spin" />
+      ) : (
+        <Zap size={15} />
+      )}
+      {label}
+    </button>
+  )
+}
+
+function JobStatusBadge({ jobId }: { jobId: string | null }) {
+  const { job, error } = useJob(jobId)
+
+  if (!jobId) return null
+
+  if (error) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-red-500">
+        <AlertCircle size={13} /> {error}
+      </span>
+    )
+  }
+
+  if (!job) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-loreboard-400">
+        <Loader2 size={13} className="animate-spin" /> Queued…
+      </span>
+    )
+  }
+
+  const statusMap: Record<string, { icon: React.ReactNode; cls: string; label: string }> = {
+    pending: { icon: <Loader2 size={13} className="animate-spin" />, cls: 'text-loreboard-400', label: 'Pending' },
+    running: { icon: <Loader2 size={13} className="animate-spin" />, cls: 'text-loreboard-600', label: 'Analyzing…' },
+    done: { icon: <CheckCircle size={13} />, cls: 'text-green-600', label: 'Analysis complete' },
+    failed: { icon: <AlertCircle size={13} />, cls: 'text-red-500', label: 'Analysis failed' },
+    cancelled: { icon: <AlertCircle size={13} />, cls: 'text-gray-400', label: 'Cancelled' },
+  }
+
+  const { icon, cls, label } = statusMap[job.status] ?? statusMap.pending
+
+  return (
+    <span className={`flex items-center gap-1.5 text-xs ${cls}`}>
+      {icon} {label}
+    </span>
+  )
 }

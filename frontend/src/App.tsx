@@ -1,17 +1,15 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Landing from './pages/Landing';
-import Editor from './pages/Editor';
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Landing from './pages/Landing'
+import Editor from './pages/Editor'
 
-function App() {
+export default function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/editor" element={<Editor />} />
+        <Route path="/editor/:storyId" element={<Editor />} />
       </Routes>
-    </Router>
-  );
+    </BrowserRouter>
+  )
 }
-
-export default App;
