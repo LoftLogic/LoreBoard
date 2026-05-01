@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import functools
+import logging
 import time
 import uuid
 from collections.abc import Callable
@@ -44,7 +45,7 @@ def configure_logging() -> None:
             else structlog.dev.ConsoleRenderer(),
         ],
         wrapper_class=structlog.make_filtering_bound_logger(
-            getattr(__import__("logging"), _settings.log_level)
+            getattr(logging, _settings.log_level)
         ),
         cache_logger_on_first_use=True,
     )

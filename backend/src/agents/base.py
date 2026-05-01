@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 
 import anthropic
+from sqlalchemy import update
 
 from src.config import get_settings
 from src.context.assembler import Context
@@ -50,7 +51,7 @@ class Agent(ABC):
 
             async with AsyncSessionLocal() as session:
                 await session.execute(
-                    __import__("sqlalchemy").update(AgentRun)
+                    update(AgentRun)
                     .where(AgentRun.id == run_id)
                     .values(
                         output_data=output.model_dump(mode="json"),
@@ -66,7 +67,7 @@ class Agent(ABC):
         except Exception as exc:
             async with AsyncSessionLocal() as session:
                 await session.execute(
-                    __import__("sqlalchemy").update(AgentRun)
+                    update(AgentRun)
                     .where(AgentRun.id == run_id)
                     .values(
                         status="failed",

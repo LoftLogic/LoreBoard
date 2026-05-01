@@ -25,11 +25,15 @@ class WorkingMemory:
 
     @classmethod
     async def create(cls, job_id: str) -> "WorkingMemory":
+        from src.telemetry.tracer import get_logger
         try:
             client = aioredis.from_url(_settings.redis_url, decode_responses=True)
             await client.ping()
             return cls(job_id, client)
-        except Exception:
+        except Exception as exc:
+            get_logger("memory").warning(
+                "working_memory.redis_unavailable", error=str(exc), fallback="in-process"
+            )
             return cls(job_id, None)
 
     def _key(self, field: str) -> str:

@@ -5,9 +5,11 @@ import json
 
 from src.context.assembler import Context
 from src.output.schemas import AgentType, OrchestratorOutput, PlannedJob
-from src.telemetry.tracer import trace_agent
+from src.telemetry.tracer import get_logger, trace_agent
 
 from .base import Agent
+
+log = get_logger("agents.orchestrator")
 
 
 class OrchestratorAgent(Agent):
@@ -45,8 +47,8 @@ class OrchestratorAgent(Agent):
         try:
             jobs_data = json.loads(raw)
             planned = [PlannedJob(**j) for j in jobs_data]
-        except Exception:
-            # Graceful degradation: return empty plan, let caller retry or escalate
+        except Exception as exc:
+            log.warning("orchestrator.parse_failed", error=str(exc), raw_preview=raw[:200])
             planned = []
 
         return OrchestratorOutput(

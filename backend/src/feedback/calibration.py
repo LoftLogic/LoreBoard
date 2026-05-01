@@ -81,17 +81,16 @@ class CalibrationService:
         if not rows:
             return CalibrationContext(agent_type=agent_type, avg_rating=0.0)
 
-        ratings = [r.FeedbackEntry.rating for r in rows if r.FeedbackEntry.rating]
+        ratings = [fb.rating for fb, _ in rows if fb.rating]
         avg = sum(ratings) / len(ratings) if ratings else 0.0
 
         low_patterns: list[str] = []
         overrides: list[dict] = []
-        for row in rows:
-            fb = row.FeedbackEntry
+        for fb, _ in rows:
             if fb.rating and fb.rating <= 2 and fb.notes:
                 low_patterns.append(fb.notes)
             if fb.calibration_data:
-                overrides.append(fb.calibration_data)
+                overrides.append(fb.calibration_data)  # type: ignore[arg-type]
 
         return CalibrationContext(
             agent_type=agent_type,

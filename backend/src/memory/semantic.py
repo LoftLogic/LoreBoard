@@ -21,9 +21,10 @@ class SemanticMemory:
 
     async def store_entity_embedding(self, entity_id: uuid.UUID, description: str) -> None:
         vector = await self._embedder.embed(description)
+        vec_str = "[" + ",".join(str(x) for x in vector) + "]"
         await self._s.execute(
-            text("UPDATE entities SET embedding = :vec WHERE id = :id"),
-            {"vec": str(vector), "id": str(entity_id)},
+            text("UPDATE entities SET embedding = CAST(:vec AS vector) WHERE id = :id"),
+            {"vec": vec_str, "id": str(entity_id)},
         )
 
     async def find_similar_entities(
@@ -35,6 +36,7 @@ class SemanticMemory:
     ) -> list[tuple[Entity, float]]:
         """Returns (entity, cosine_distance) pairs sorted by similarity."""
         vector = await self._embedder.embed(query)
+        vec_str = "[" + ",".join(str(x) for x in vector) + "]"
         # pgvector cosine distance operator: <=>
         result = await self._s.execute(
             text("""
@@ -46,7 +48,7 @@ class SemanticMemory:
                 ORDER BY distance
                 LIMIT :k
             """),
-            {"vec": str(vector), "story_id": str(story_id), "threshold": distance_threshold, "k": top_k},
+            {"vec": vec_str, "story_id": str(story_id), "threshold": distance_threshold, "k": top_k},
         )
         rows = result.fetchall()
         if not rows:
