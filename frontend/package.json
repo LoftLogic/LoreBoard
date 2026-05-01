@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@lexical/react": "^0.38.2",
     "@types/node": "^20.0.0",
     "@types/quill": "^2.0.14",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "axios": "^1.6.0",
+    "lexical": "^0.38.2",
     "lucide-react": "^0.294.0",
     "quill": "^2.0.3",
     "react": "^18.2.0",
