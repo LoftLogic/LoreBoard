@@ -1,0 +1,173 @@
+LOREBOARD CSS STYLE GUIDE
+========================
+
+THEME: Rich Purple Aesthetic
+Primary Color: Purple (#a855f7)
+Color Philosophy: Deep, mystical purples evoking creativity and imagination
+
+COLOR PALETTE
+=============
+Primary Colors:
+- loreboard-500 (#a855f7) - Main purple for primary actions
+- loreboard-600 (#9333ea) - Hover states
+- loreboard-700 (#7e22ce) - Active/pressed states
+- loreboard-950 (#3b0764) - Dark backgrounds
+
+Accent Colors:
+- accent-gold (#fbbf24) - Highlights, important elements
+- accent-rose (#f43f5e) - Errors, destructive actions
+- accent-teal (#14b8a6) - Success states, confirmations
+
+Background Colors:
+- loreboard-50 (#faf5ff) - Light background
+- loreboard-100 (#f3e8ff) - Card backgrounds
+- white - Primary content background
+
+Text Colors:
+- gray-900 - Primary text
+- gray-700 - Secondary text
+- loreboard-300 - Text on dark backgrounds
+
+COMPONENT STYLING PATTERNS
+==========================
+
+1. Buttons
+----------
+Primary Button:
+className="bg-loreboard-500 hover:bg-loreboard-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-purple-glow"
+
+Secondary Button:
+className="border-2 border-loreboard-500 text-loreboard-600 hover:bg-loreboard-50 px-4 py-2 rounded-lg transition-colors duration-200"
+
+Ghost Button:
+className="text-loreboard-600 hover:bg-loreboard-100 px-4 py-2 rounded-lg transition-colors duration-200"
+
+2. Cards
+--------
+Base Card:
+className="bg-white rounded-xl shadow-lg p-6 border border-loreboard-100 hover:shadow-purple-glow transition-shadow duration-300"
+
+Entity Card:
+className="bg-gradient-to-br from-loreboard-50 to-white rounded-xl shadow-md p-4 border border-loreboard-200"
+
+3. Input Fields
+---------------
+Text Input:
+className="border-2 border-loreboard-200 focus:border-loreboard-500 rounded-lg px-4 py-2 outline-none transition-colors duration-200"
+
+Text Area:
+className="border-2 border-loreboard-200 focus:border-loreboard-500 rounded-lg px-4 py-3 outline-none transition-colors duration-200 resize-none"
+
+4. Navigation
+-------------
+Nav Item:
+className="text-gray-700 hover:text-loreboard-600 px-3 py-2 rounded-md hover:bg-loreboard-50 transition-all duration-200"
+
+Active Nav Item:
+className="text-loreboard-600 bg-loreboard-100 px-3 py-2 rounded-md font-semibold"
+
+5. Modals/Overlays
+------------------
+Overlay:
+className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+
+Modal:
+className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl mx-auto animate-slide-in"
+
+6. Lists
+--------
+List Item:
+className="border-b border-loreboard-100 py-3 hover:bg-loreboard-50 transition-colors duration-200"
+
+Selected Item:
+className="bg-loreboard-100 border-l-4 border-loreboard-500 pl-4"
+
+7. Tags/Badges
+--------------
+Entity Tag:
+className="inline-block bg-loreboard-200 text-loreboard-800 px-3 py-1 rounded-full text-sm font-medium"
+
+Status Badge:
+className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent-teal text-white"
+
+8. Animations
+-------------
+Fade In:
+className="animate-fade-in"
+
+Pulse (for loading):
+className="animate-pulse-soft"
+
+Slide In:
+className="animate-slide-in"
+
+UTILITY CLASSES
+===============
+
+Spacing:
+- Use consistent spacing: p-2, p-4, p-6, p-8
+- Margins: mt-4, mb-6, mx-auto
+- Gaps in flex/grid: gap-4, gap-6
+
+Typography:
+- Headings: text-3xl font-bold text-gray-900
+- Subheadings: text-xl font-semibold text-gray-700
+- Body: text-base text-gray-700
+- Small: text-sm text-gray-600
+
+Borders:
+- Default: border border-loreboard-200
+- Focus: focus:border-loreboard-500
+- Rounded: rounded-lg or rounded-xl
+
+Shadows:
+- Small: shadow-sm
+- Default: shadow-md
+- Large: shadow-lg
+- Purple Glow: shadow-purple-glow
+
+RESPONSIVE DESIGN
+=================
+Mobile First Approach:
+- Base styles for mobile
+- sm: (640px) - Tablets
+- md: (768px) - Small laptops
+- lg: (1024px) - Desktops
+- xl: (1280px) - Large screens
+
+Example:
+className="p-4 md:p-6 lg:p-8 text-sm md:text-base"
+
+DARK MODE CONSIDERATIONS
+========================
+(Future implementation)
+- Use dark: prefix for dark mode styles
+- Example: dark:bg-loreboard-950 dark:text-loreboard-100
+
+ACCESSIBILITY
+=============
+- Always include focus states
+- Maintain color contrast ratios (WCAG AA)
+- Use semantic HTML with appropriate ARIA labels
+- Include hover and active states
+
+CUSTOM UTILITIES
+================
+Add to tailwind.config.js as needed:
+- Custom animations
+- Extended color palette
+- Custom spacing values
+
+USAGE EXAMPLES
+==============
+
+Entity Card Component:
+<div className="bg-gradient-to-br from-loreboard-50 to-white rounded-xl shadow-md p-4 border border-loreboard-200 hover:shadow-purple-glow transition-shadow duration-300">
+  <h3 className="text-lg font-semibold text-gray-900 mb-2">Character Name</h3>
+  <span className="inline-block bg-loreboard-200 text-loreboard-800 px-3 py-1 rounded-full text-sm font-medium">Main Character</span>
+</div>
+
+Primary Action Button:
+<button className="bg-loreboard-500 hover:bg-loreboard-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-purple-glow font-medium">
+  Create New Entity
+</button>

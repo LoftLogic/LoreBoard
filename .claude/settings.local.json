@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\evanl\\\\Loreboard\" -Recurse -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "Bash(Format-Table -AutoSize)",
+      "PowerShell(ls -Recurse \"C:\\\\Users\\\\evanl\\\\Loreboard\" -Directory | Where-Object { $_.FullName -notmatch '\\\\.git' } | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\evanl\\\\Loreboard\" -Depth 0 | Where-Object { $_.Name -notlike '.git' -and $_.Name -notlike '.idea' -and $_.Name -notlike '.claude' } | Select-Object Name, PSIsContainer)",
+      "Bash(git checkout *)",
+      "Bash(git rm *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(python -m py_compile backend/src/**/*.py)",
+      "Bash(git reset *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/lexical/package.json'\\).version\\)\")",
+      "Bash(grep -E '\\(Serialized|setBlocksType|$setBlocksType\\)' C:/Users/evanl/LoreBoard/frontend/node_modules/@lexical/rich-text/index.d.ts)",
+      "Bash(npx tsc *)",
+      "PowerShell(Get-ChildItem C:\\\\Users\\\\evanl\\\\Loreboard | Where-Object { $_.Extension -eq \".md\" } | Select-Object Name)"
+    ]
+  }
+}

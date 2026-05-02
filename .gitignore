@@ -1,6 +1,2 @@
-*/venv
-*/env
-.DS_STORE
-/node_modules
-__pycache__
 .env
+node_modules/
