@@ -27,7 +27,7 @@ export default function Editor() {
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [analyzeJobId, setAnalyzeJobId] = useState<string | null>(null)
 
-  const { job: analyzeJob } = useJob(analyzeJobId)
+  useJob(analyzeJobId)
 
   const handleChange = useCallback((state: EditorState) => {
     setEditorState(state)

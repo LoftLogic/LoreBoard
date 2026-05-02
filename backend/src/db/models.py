@@ -200,6 +200,9 @@ class AgentRun(Base):
     feedback: Mapped[list["FeedbackEntry"]] = relationship(
         "FeedbackEntry", back_populates="run", cascade="all, delete-orphan"
     )
+    llm_calls: Mapped[list["LlmCall"]] = relationship(
+        "LlmCall", back_populates="run", cascade="all, delete-orphan", order_by="LlmCall.created_at"
+    )
 
 
 class FeedbackEntry(Base):
@@ -214,6 +217,30 @@ class FeedbackEntry(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     run: Mapped["AgentRun"] = relationship("AgentRun", back_populates="feedback")
+
+
+# ---------------------------------------------------------------------------
+# LLM Call Telemetry
+# ---------------------------------------------------------------------------
+
+class LlmCall(Base):
+    __tablename__ = "llm_calls"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    run_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("agent_runs.id", ondelete="CASCADE"), index=True
+    )
+    model: Mapped[str] = mapped_column(String(200), nullable=False)
+    input_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    output_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    latency_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    stop_reason: Mapped[str | None] = mapped_column(String(100))
+    tool_calls: Mapped[list] = mapped_column(JSONB, default=list)
+    input_messages: Mapped[dict] = mapped_column(JSONB, default=dict)
+    output_content: Mapped[list] = mapped_column(JSONB, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    run: Mapped["AgentRun"] = relationship("AgentRun", back_populates="llm_calls")
 
 
 # ---------------------------------------------------------------------------

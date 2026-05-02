@@ -1,5 +1,6 @@
-import { HeadingNode, $createHeadingNode } from '@lexical/rich-text'
-import type { EditorConfig, LexicalNode, SerializedHeadingNode } from 'lexical'
+import { HeadingNode } from '@lexical/rich-text'
+import type { SerializedHeadingNode } from '@lexical/rich-text'
+import type { EditorConfig, Klass, LexicalNode } from 'lexical'
 
 /** Custom heading variant used for chapter subtitles / scene breaks. */
 export class SubtitleNode extends HeadingNode {
@@ -17,7 +18,7 @@ export class SubtitleNode extends HeadingNode {
     return el
   }
 
-  static importJSON(serialized: SerializedHeadingNode): SubtitleNode {
+  static importJSON(_serialized: SerializedHeadingNode): SubtitleNode {
     return $createSubtitleNode()
   }
 
@@ -31,4 +32,4 @@ export function $createSubtitleNode(): SubtitleNode {
 }
 
 /** All custom nodes that must be registered with the LexicalComposer. */
-export const CUSTOM_NODES: Array<typeof LexicalNode> = [SubtitleNode]
+export const CUSTOM_NODES: Klass<LexicalNode>[] = [SubtitleNode]

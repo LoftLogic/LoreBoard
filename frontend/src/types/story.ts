@@ -1,4 +1,5 @@
 import type { AnalysisState, FlagSeverity, JobStatus } from './api'
+export type { JobStatus }
 
 export interface Story {
   id: string

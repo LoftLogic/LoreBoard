@@ -7,9 +7,9 @@ import {
   FORMAT_TEXT_COMMAND,
 } from 'lexical'
 import { $setBlocksType } from '@lexical/selection'
-import { HeadingNode, $createHeadingNode } from '@lexical/rich-text'
+import { $createHeadingNode } from '@lexical/rich-text'
 import { Bold, Italic, Search, Underline } from 'lucide-react'
-import { $createSubtitleNode, SubtitleNode } from './nodes'
+import { $createSubtitleNode } from './nodes'
 
 type TextBlockType = 'basic' | 'title' | 'chapter' | 'subtitle'
 

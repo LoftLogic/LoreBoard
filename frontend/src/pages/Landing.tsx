@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Sparkles, Network, ArrowRight, GitBranch, Feather } from 'lucide-react';
+import { BookOpen, Sparkles, ArrowRight, Feather } from 'lucide-react';
 
 const BoldPurple = (text: string) => {
   return <span className="bg-gradient-to-r from-loreboard-600 to-loreboard-500 bg-clip-text text-transparent">

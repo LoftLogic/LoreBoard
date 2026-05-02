@@ -5,7 +5,6 @@ import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 
-import anthropic
 from sqlalchemy import update
 
 from src.config import get_settings
@@ -13,6 +12,7 @@ from src.context.assembler import Context
 from src.db.models import AgentRun
 from src.db.session import AsyncSessionLocal
 from src.output.schemas import AgentOutput, AgentType
+from src.telemetry.collector import InstrumentedAnthropic
 from src.telemetry.tracer import get_logger, trace_agent
 
 log = get_logger("agents")
@@ -23,7 +23,7 @@ class Agent(ABC):
     agent_type: AgentType
 
     def __init__(self) -> None:
-        self._client = anthropic.AsyncAnthropic(api_key=_settings.anthropic_api_key)
+        self._client = InstrumentedAnthropic()
 
     @abstractmethod
     async def _execute(self, context: Context, job_id: str) -> AgentOutput:
@@ -31,7 +31,7 @@ class Agent(ABC):
         ...
 
     async def run(self, context: Context, job_id: str) -> AgentOutput:
-        """Runs the agent, persisting an AgentRun record for telemetry."""
+        """Creates an AgentRun record, instruments the client, then delegates to _execute."""
         run_id = uuid.uuid4()
         async with AsyncSessionLocal() as session:
             run = AgentRun(
@@ -45,6 +45,7 @@ class Agent(ABC):
             session.add(run)
             await session.commit()
 
+        self._client.set_run_id(run_id)
         try:
             output = await self._execute(context, job_id)
             output.run_id = run_id
@@ -77,6 +78,8 @@ class Agent(ABC):
                 )
                 await session.commit()
             raise
+        finally:
+            self._client.set_run_id(None)
 
     def _build_system_prompt(self, context: Context, extra: str = "") -> str:
         ctx_dict = context.to_prompt_dict()
