@@ -13,7 +13,7 @@ from src.db.models import AgentRun
 from src.db.session import AsyncSessionLocal
 from src.output.schemas import AgentOutput, AgentType
 from src.telemetry.collector import InstrumentedAnthropic
-from src.telemetry.tracer import get_logger, trace_agent
+from src.telemetry.tracer import get_logger
 
 log = get_logger("agents")
 _settings = get_settings()
